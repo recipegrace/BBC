@@ -1,22 +1,24 @@
 sudo: false
 cache:
   directories:
-  - $HOME/.ivy2/cache
-  - $HOME/.sbt/boot/
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
 language: scala
 scala:
 - 2.12.6
 jdk:
 - oraclejdk8
-
 script:
-- ./sbt ++$TRAVIS_SCALA_VERSION clean coverage test
+- "./sbt ++$TRAVIS_SCALA_VERSION clean coverage test"
 - if [ "$TRAVIS_BRANCH" == "master" ]; then ./sbt ++$TRAVIS_SCALA_VERSION publishSigned;
   fi
 after_success:
-- ./sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
+- "./sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls"
 notifications:
   email:
     recipients:
     - feroshjacob@gmail.com
-
+env:
+  global:
+  - secure: YtGA7ccGxXJEdaRkkuigXUf9b/UzKduqylnCNgGwojWN+n2G/tQOoQ2qTZdGstk0FBOMWYsldeoR2OVuG27L3S+dfrPwvHcIEQleGj9y0lrP7j826tsINXF6iYQhKkApDz1FBw+31Bi/0JCPHWDZlx3h+0P68ObZsEVadSmqiT3nXmBrke2w6FCgxx4WhpsWg253NSKzhoV8ptkfLkRONCzz9obVeblOXjwWZbqV9dzK7nWFpY8segmc4wk5asnVmWoj2xHoXsdA58Ux8VLGBUM4Gj/gIDP5xc4ZHbC9UbfodTSoy9UV3mM7Qg242Tn9NFXYci6uPanJEsco7ng3Zs7oc4mLKSa1Dq5JK/DNDo/YuWGw89A4FAz84VmFU6ARNxlICz/5Z8d40bgcGpChbpsfFbie8UUOrmUSrwSDpzxVbF9+KXNa1kQyWYvnABuH7Q3uwIX5pdSDUPdzIDoPwOLgeekV3OxcPb+l5bydQd9Tm1+WlLIijxR3v3S2L3UKG5Yl/FP2MVOXqYejlKrZ0Noj2bVwBznkby5+GSp15WZlX4K0zh//bjTM2uJT+2Ec0oqRi+dvrX3NTkzuyEh5gN+hzbIBwg6hHUfExUUPEakaML7/kajjNzn+HfKZ3LCuHJKzCl8NKYyYuxB3szdU9OFSSbUr8AI8PN2uzB+mMQY=
+  - secure: JdY0qT3g2/bYEzUaQWQFbNSH0s9z2pe1lAWRpqxOZyW9OfrOHSc/bsDsWDtfyukQCv8U+ZxZd8rDI/+94XWs0CsAihg7rhAe74sD69daRqraotzYK1rL/UWsgnqwmWkbpxTbaczsYh/ci3cAreKwGGYXaBhr5Hcc7pGnMQ/GZAjomvzLODonb9n3syXirv17n4itb6uoCgjCs+4TxLIBZEzqeXffQKlTln4PDk6m12i36HaRWZQDtPyOb/xOCWsLob56aTkcj96UK2b1WfoJSqttWKO/KBljk2Jx1EBvJi6IRnhxbLR0vMUASQ3vvFn1gMk3G4TqQ2digG3LBxXj7sL32RhsDrBFY3v+XqklnPzBNXY7UzxSak9zwaRNnu+4KBvqNQqqtMdUXzNROPc2poYPBkqKqw8OXupmdeuK+iOMFlXkW7svvTV8xIn6khujmuSC2pTSeQr/Xrwny249Zel5N8qX9Z1sQM7DYXhdobHSn6AHLrYowtk0GhXQTS3OBJURLw/4QP6h7KjOYCqt3GMUwJIL+11TLkkgM741sTOPCvoFZP6KFKV14svMEporScovDrYDwwOb2wJ5cTmmmRCsZaFrSEUUQNhyZspmsPBg69nfWOM+uYsCygLDDx9ZuTP+0Tr5w323RijTXWFTZONRHm1yQv3z5S2NH/bAeSY=
