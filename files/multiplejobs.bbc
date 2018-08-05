@@ -1,0 +1,67 @@
+name="CreateDataTest"
+env="rc-www-search"
+zone="us-east1-c"
+cloudWorkspace="gs://mosambi"
+var mosambi = "gs://mosambi/"
+var output = mosambi + "clickstreamout-unnormalized"
+var tempout1 = output+"1"
+var tempout2 = output+"2"
+var tempout3 = output+"3"
+var tempout4 = output+"4"
+var nlpOut = mosambi + "nlpout/clickstream-2016-searchtermsnlp"
+var finalOutput = output +"-combined"
+
+    nexus rctechlabReleases {
+                 url="https://nexus.rctechlab.com"
+                 repository="snapshots"
+                 username="{{nexus-user}}"
+                 password="{{nexus-password}}"
+     }
+    cluster simpleCluster {
+                 workers=2
+                 image="n1-standard-2"
+                 properties="spark:spark.executor.cores=2"
+    }
+
+
+    sparkjob clickstreamrunner1 {
+                 mainClass="com.recipegrace.sa.el.search.nlpapirunner.clickstream.CreateSearchLogFromClickStream"
+                 args= "--input","gs://rc-www-search-personalization/ClickstreamData/OnlineOut/2016-0[1-3]*/search/*","--output",tempout1,"--partitions","500"
+                 jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rctechlabReleases
+    }
+    sparkjob clickstreamrunner2 {
+                 mainClass="com.recipegrace.sa.el.search.nlpapirunner.clickstream.CreateSearchLogFromClickStream"
+                 args= "--input","gs://rc-www-search-personalization/ClickstreamData/OnlineOut/2016-0[4-6]*/search/*","--output",tempout2,"--partitions","500"
+                 jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rctechlabReleases
+    }
+    sparkjob clickstreamrunner3 {
+                 mainClass="com.recipegrace.sa.el.search.nlpapirunner.clickstream.CreateSearchLogFromClickStream"
+                 args= "--input","gs://rc-www-search-personalization/ClickstreamData/OnlineOut/2016-0[7-9]*/search/*","--output",tempout3,"--partitions","500"
+                 jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rctechlabReleases
+    }
+    sparkjob clickstreamrunner4 {
+                 mainClass="com.recipegrace.sa.el.search.nlpapirunner.clickstream.CreateSearchLogFromClickStream"
+                 args= "--input","gs://rc-www-search-personalization/ClickstreamData/OnlineOut/2016-1*/search/*","--output",tempout4,"--partitions","500"
+                 jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rctechlabReleases
+    }
+    sparkjob clickstreamcombiner {
+                 mainClass="com.recipegrace.sa.el.search.nlpapirunner.clickstream.ClickStreamCombiner"
+                 args= "--input",output+"*","--output",finalOutput
+                 jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rctechlabReleases
+    }
+
+    delete tempout2
+    run clickstreamrunner2 on  simpleCluster
+    delete tempout3
+    run clickstreamrunner3 on  simpleCluster
+    delete tempout4
+    run clickstreamrunner4 on  simpleCluster
+
+
+    delete finalOutput
+    run clickstreamcombiner on  simpleCluster
+    delete tempout1
+    delete tempout2
+    delete tempout3
+    delete tempout4
+

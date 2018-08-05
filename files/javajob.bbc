@@ -1,0 +1,16 @@
+        name="1"
+        zone="east"
+        env="stage"
+
+        sbtjob example {
+                 mainClass="com.hello.HelloWorld"
+                 repository= "git@github.recipegrace.com:OLT-search/Judas.git"
+                 repoBranch="master"
+                 container="ksrpk/python-gensim-gcloud"
+                 args = "--this", "will", "--may", "work"
+                 }
+
+
+
+
+        run example

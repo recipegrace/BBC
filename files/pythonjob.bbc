@@ -1,0 +1,17 @@
+        name="1"
+        zone="east"
+        env="stage"
+
+        pythonjob example {
+                 mainPyFile="src/two_way_similarity.py"
+                 repository= "git@github.recipegrace.com:OLT-search/Judas.git"
+                 repoBranch="master"
+                 container="ksrpk/python-gensim-gcloud"
+                 args = "--this", "will", "--may", "work"
+                 }
+
+
+
+
+        run example
+        run example

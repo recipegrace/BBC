@@ -1,0 +1,119 @@
+
+name="ProductTypeClassification"
+env="rc-www-search"
+zone="us-central1-c"
+cloudWorkspace="gs://mosambi"
+var workFolder = "gs://mosambi/work/"
+var productClassification = workFolder+ "product-classification/"
+var pythonFolder = productClassification+"python/"
+var vectorFolder = productClassification+"vectors/"
+var weighted_word2vec = "weighted_word2vec"
+var word2vec = "word2vec"
+var weighted_glove = "weighted_glove"
+var glove = "glove"
+
+artifactory rcartifactory {
+    url="https://maven.artifactory.recipegrace.com/artifactory"
+    repository="libs-snapshot-local"
+
+ }
+
+sparkjob catalogToTitles {
+    mainClass="com.recipegrace.sa.el.content.TitleWithOutNumbers"
+    args= "--catalog", productClassification+"search-product-master-2017-11-11/",
+    "--output", productClassification+"search-product-master-2017-11-11-titles/"
+    jarLocation= % "com.recipegrace.sa.el.search" % "productclassification_2.11" % "1.0-SNAPSHOT" from rcartifactory
+}
+
+sparkjob catalogToProdText {
+    mainClass="com.recipegrace.sa.el.content.TitleDescriptAndBullets"
+    args= "--catalog", productClassification+"search-product-master-2017-11-11/",
+    "--output", productClassification+"search-product-master-2017-11-11-prodText/"
+    jarLocation= % "com.recipegrace.sa.el.search" % "productclassification_2.11" % "1.0-SNAPSHOT" from rcartifactory
+}
+cluster productTypeClassification {
+    workers=10
+    image="n1-standard-32"
+    properties="spark:spark.executor.cores=32","spark:spark.yarn.executor.memoryOverhead=5120"
+
+}
+
+
+sparkjob generateLenneausInput(catalog) {
+    mainClass="com.recipegrace.sa.el.search.evaluation.GenerateLenneausInput"
+    args="--manualList", productClassification+"high-confident.csv",
+    "--outputFile",  productClassification+"user-eval-ops3-input.csv",
+    "--catalog", catalog
+    jarLocation= % "com.recipegrace.sa.el.search" % "productclassification_2.11" % "1.0-SNAPSHOT" from rcartifactory
+}
+
+
+
+sparkjob productClassficationBase(inputFile, isText, onlyTitle, classifier,numFeatures) {
+    mainClass="com.recipegrace.sa.el.search.pt.BaseProductTypeClassification"
+    args= "--numFeatures",numFeatures,
+    "--numPartitions","120",
+    "--inputFile",productClassification+ inputFile,
+    "--outputFile", inputFile+isText+classifier+numFeatures+onlyTitle,
+    "--catalogFile", inputFile,
+     "--classifier",classifier,
+    "--isText",isText,
+    "--onlyTitle",onlyTitle
+    jarLocation= % "com.recipegrace.sa.el.search" % "productclassification_2.11" % "1.0-SNAPSHOT" from rcartifactory
+}
+
+
+
+pysparkjob generate_word2vec_vectors(catalog,algorithm) {
+    mainPyFile=pythonFolder+"pt_title_sim_spark.py"
+    otherPyFiles= pythonFolder+"spark_wrapper.py",pythonFolder+"custom_tokenize.py", pythonFolder+"text_similarity.py"
+    args="--catalogFile",productClassification+catalog,
+    "--word2vecModel",pythonFolder+"models/word2vec_spark_pt_v1.0",
+    "--tfidfModel",pythonFolder+"models/tfidf_spark_pt_v1.0",
+    "--gloveFile",workFolder+"python/models/glove.6B.100d.txt",
+    "--cvModel",pythonFolder+"models/cv_spark_pt_v1.0",
+    "--vectorAlgorithm",algorithm,
+    "--outputFolder",vectorFolder+algorithm+catalog+"1"
+    }
+
+
+pysparkjob groupByWord2vecVectors(inputFile,algorithm) {
+    mainPyFile=pythonFolder+"group_pt_title_sim_spark.py"
+    otherPyFiles= pythonFolder+"spark_wrapper.py"
+    args="--inputFile",inputFile,
+    "--vectorAlgorithm",algorithm,
+    "--outputFolder",inputFile+"grouped"
+    }
+
+sparkjob groupByWord2vecVectorsRDD(inputFile,algorithm) {
+    mainClass="com.recipegrace.sa.el.search.pt.GroupByProductType"
+    args="--inputFile",inputFile,
+    "--algorithm",algorithm,
+    "--outputFile",inputFile+"groupedscala"
+    jarLocation= % "com.recipegrace.sa.el.search" % "productclassification_2.11" % "1.0-SNAPSHOT" from rcartifactory
+}
+
+
+pipeline generate_classification(catalog,algorithm,classifier){
+    run generate_word2vec_vectors(catalog,algorithm) on productTypeClassification
+    run productClassficationBase(vectorFolder+algorithm+catalog, "false","false",classifier,"20000") on productTypeClassification
+
+}
+
+//run groupByWord2vecVectors(vectorFolder+word2vec+"search-product-master-2017-11-111",word2vec) on productTypeClassification
+run groupByWord2vecVectorsRDD(vectorFolder+word2vec+"search-product-master-2017-11-111",word2vec) on productTypeClassification
+
+//run generate_classification("search-product-master-2017-11-11",word2vec,"nb")
+//run generate_classification("search-product-master-2017-11-11",word2vec,"rf")
+
+//run generateLenneausInput(productClassification+"search-product-master-2017-11-11") on  productTypeClassification
+//run productClassficationBase(productClassification+"search-product-master-2017-11-11", "true","false","nb","20000") on  productTypeClassification
+//run productClassficationBase(productClassification+"search-product-master-2017-11-11", "true","true","nb","20000") on  productTypeClassification
+//run productClassficationBase(productClassification+"search-product-master-2017-11-11", "true","false","ml","10000") on  productTypeClassification
+//run productClassficationBase(productClassification+"search-product-master-2017-11-11", "true","true","ml","10000") on  productTypeClassification
+//run productClassficationBase(productClassification+"search-product-master-2017-11-11", "true","false","ml","20000") on  productTypeClassification
+//run productClassficationBase(productClassification+"search-product-master-2017-11-11", "true","true","ml","20000") on  productTypeClassification
+
+
+//run productClassficationBase("doc2vec.v1.prodText-2017-11-11", "false") on  productTypeClassification
+//run catalogToProdText on  productTypeClassification

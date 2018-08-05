@@ -1,0 +1,51 @@
+        name="1"
+        zone="east"
+        env="stage"
+cloudWorkspace="gs://mosambi"
+        pythonjob example {
+                 mainPyFile="src/two_way_similarity.py"
+                 repository= "git@github.recipegrace.com:OLT-search/Judas.git"
+                 repoBranch="master"
+                 container="ksrpk/python-gensim-gcloud"
+                 args = "--this", "will", "--may", "work"
+                 }
+
+
+
+
+
+
+
+    var mosambi = "gs://mosambi"
+    var output = mosambi + "/nlpout/sherindatasetnlp"
+
+    nexus rctechlabReleases {
+        url="https://nexus.rctechlab.com"
+        repository="snapshots"
+        username="{{nexus-user}}"
+        password="{{nexus-password}}"
+
+    }
+    sparkjob nlpRunner {
+        mainClass="com.recipegrace.sa.el.search.nlpapirunner.darshan.NLPRunner"
+        args= "--inputFile",mosambi+"sherindataset.txt","--nlpFile",mosambi+"nlpContent.zip","--output",output,"--partitions","500","--dataset","sherin"
+        jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rctechlabReleases
+    }
+    cluster simpleCluster1 {
+        workers=10
+        image="n1-standard-16"
+        properties="spark:spark.executor.cores=16"
+        version="somethingortheother"
+    }
+        cluster simpleCluster2 {
+            workers=10
+            image="n1-standard-16"
+            properties="spark:spark.executor.cores=16"
+            version="somethingortheother"
+        }
+
+
+         run nlpRunner on  simpleCluster1
+         run example
+         run nlpRunner on  simpleCluster1
+

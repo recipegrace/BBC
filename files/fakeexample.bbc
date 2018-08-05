@@ -1,0 +1,34 @@
+name="SearchEval"
+env="rc-www-search"
+zone="us-central1-c"
+cloudWorkspace="gs://mosambi"
+var solrprod = "solrprod"
+var solrrelevance = "solrrelevance"
+var solrstage = "solrstage"
+var mosambi = "gs://mosambi/"
+var work = mosambi+"work/"
+var searchNavOutFolder = work + "searchnavout/"
+var searchNavOutTextFolder = work + "searchnavouttext/"
+var searchLogDatasets = "searchlogdatasets/"
+var pythonFolder = work+"python/"
+var evalFolder = work+"eval-reports/"
+var weighted_word2vec = "weighted_word2vec"
+var word2vec = "word2vec"
+var weighted_glove = "weighted_glove"
+var glove = "glove"
+var tfidf = "tfidf"
+var searchLog = "All-50k-morethan50.txt"
+pythonjob plot(tag1, tag2,searchLog,productsToCompare) {
+mainPyFile="src/plot_two_way_summary.py"
+repository= "git@github.recipegrace.com:OLT-search/Kabali.git"
+repoBranch="master"
+container="ksrpk/python-gensim-gcloud"
+args = "--dataset",searchLog, "--firstTag",tag1, "--secondTag",tag2,"--vectorAlgorithms","word2vec,weighted_word2vec,glove,weighted_glove","--inputFile",evalFolder+"aggregated-twoway"+tag1+tag2+searchLog+productsToCompare+"/"+tag1+"-"+tag2+"summary.csv"
+}
+
+pipeline twowaypipe(productsToCompare){
+run plot(solrprod,solrstage,searchLog,productsToCompare)
+}
+
+run twowaypipe("5")
+run twowaypipe("10")

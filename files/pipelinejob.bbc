@@ -1,0 +1,16 @@
+name="PipeLineTest" zone="east"
+env="stage"
+pythonjob example1(argument1, argument2, argument3, argument4) {
+  mainPyFile="src/Echo.py"
+  repository= "git@github.recipegrace.com:OLT-search/Kabali.git"
+  repoBranch="master"
+  container="ksrpk/python-gensim-gcloud"
+  args = argument1, argument2, argument3, argument4
+}
+pipeline examplepipe(first, second){
+run example1("one","two", first, second)
+
+}
+run examplepipe("three", "four")
+run examplepipe("three1", "four1")
+run examplepipe("three2", "four2")

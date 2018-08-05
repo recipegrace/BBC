@@ -1,0 +1,26 @@
+name="CreateDataTest"
+env="rc-www-search"
+zone="us-east1-c"
+cloudWorkspace="gs://mosambi"
+
+    var mosambi = "gs://mosambi"
+    var output = mosambi + "/nlpout/sherindatasetnlp"
+
+    artifactory rcArtifactory {
+        url="https://maven.artifactory.recipegrace.com"
+        repository="snapshots"
+
+    }
+    sparkjob nlpRunner {
+        mainClass="com.recipegrace.sa.el.search.nlpapirunner.darshan.NLPRunner"
+        args= "--inputFile",mosambi+"sherindataset.txt","--nlpFile",mosambi+"nlpContent.zip","--output",output,"--partitions","500","--dataset","sherin"
+        jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rcArtifactory
+    }
+    cluster simpleCluster {
+        workers=10
+        image="n1-standard-16"
+        properties="spark:spark.executor.cores=16"
+    }
+
+        delete output
+         run nlpRunner on  simpleCluster

@@ -1,0 +1,35 @@
+name="CreateDataTest"
+env="rc-www-search"
+zone="us-east1-c"
+cloudWorkspace="gs://mosambi"
+
+    var mosambi = "gs://mosambi"
+    var output = "temp"
+    pysparkjob example {
+        mainPyFile="gs://mosambi/work/python/twowaysimilarity_spark.py"
+        args="--firstFile","gs://mosambi/work/base.csv",
+                     "--secondFile","gs://mosambi/work/change.csv",
+                   "--word2vecModel","gs://mosambi/work/python/models/word2vec_spark_v1.0",
+                     "--tfidfModel","gs://mosambi/work/python/models/tfidf_spark_v1.0",
+                     "--cvModel","gs://mosambi/work/python/models/cv_spark_v1.0",
+                    "--firstTag","base",
+                   "--secondTag","change",
+                     "--outputFolder","gs://mosambi/work/pyspark-output"
+        otherPyFiles= "gs://mosambi/work/python/spark_wrapper.py","gs://mosambi/work/python/readers.py","gs://mosambi/work/python/custom_tokenize.py"
+    }
+
+           sparkjob test1 {
+            mainClass="main"
+            jarLocation="s"
+            }
+    cluster simpleCluster {
+        workers=2
+        image="n1-standard-2"
+        properties="spark:spark.executor.cores=2"
+        initialScript = "gs://mosambi/work/python/pyspark-search-eval-init.sh"
+        initialScriptTimeOut = "600s"
+
+    }
+
+         run example on  simpleCluster
+         run test1 on  simpleCluster

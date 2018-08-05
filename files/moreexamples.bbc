@@ -1,0 +1,58 @@
+
+name="SearchEval"
+env="rc-www-search"
+zone="us-central1-c"
+cloudWorkspace="gs://mosambi"
+var env1 = "solrprod"
+var env2 = "endeca"
+var mosambi = "gs://mosambi/"
+
+var idm=mosambi+"IDMTaxonomy.txt"
+var work = mosambi+"work/"
+var searchNavOutFolder = work + "searchnavout/"
+
+
+
+
+var searchLogName1 = "synonym-dataset-contains-synonym"
+
+
+var searchLogName2 = "synonym-dataset-twotoken-synonym"
+
+var searchLogName3 = "5khead10kmidAnd10ktail"
+
+var searchLogName4 = "synonym-dataset-orangegraph-synonyms"
+
+
+
+
+nexus rctechlabReleases {
+    url="https://nexus.rctechlab.com"
+    repository="snapshots"
+    username="{{nexus-user}}"
+    password="{{nexus-password}}"
+ }
+
+sparkjob generator(searchLogName) {
+    mainClass="com.recipegrace.blackjack.taxonomycomparator.TaxonomyBasedReportGenerator"
+    args= "--searchNavOut1",searchNavOutFolder+env1+"/"+searchLogName+"_good_*",
+    "--searchNavOut2",searchNavOutFolder+env2+"/"+searchLogName+"_good_*",
+    "--output",work+searchLogName+"-final-"+env1+env2,
+    "--idmTaxonomy", idm,
+    "--searchLog", work+searchLogName,
+    "--env1",env1,
+    "--env2",env2
+    jarLocation=  % "com.recipegrace.sa.el.search" % "bheem_2.11" % "0.1-SNAPSHOT" from rctechlabReleases
+}
+
+
+
+cluster simpleCluster {
+    workers=2
+    image="n1-standard-2"
+    properties="spark:spark.executor.cores=2"
+}
+run generator(searchLogName1) on simpleCluster
+run generator(searchLogName2) on simpleCluster
+run generator(searchLogName3) on simpleCluster
+run generator(searchLogName4) on simpleCluster

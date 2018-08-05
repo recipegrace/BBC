@@ -1,0 +1,87 @@
+name="SearchEval"
+env="rc-www-search"
+zone="us-central1-c"
+cloudWorkspace="gs://mosambi"
+var solrprod = "solrprod"
+var solrrelevance = "solrrelevance"
+var solrstage = "solrstage"
+var mosambi = "gs://mosambi/"
+var work = mosambi+"work/"
+var searchNavOutFolder = work + "searchnavout/"
+var searchNavOutTextFolder = work + "searchnavouttext/"
+var searchLogDatasets = "searchlogdatasets/"
+var pythonFolder = work+"python/"
+var evalFolder = work+"eval-reports/"
+var weighted_word2vec = "weighted_word2vec"
+var word2vec = "word2vec"
+var tfidf = "tfidf"
+artifactory rcartifactory {
+url="https://maven.artifactory.recipegrace.com/artifactory"
+repository="libs-snapshot-local"
+}
+sparkjob webRequestRunner(env,searchLogName) {
+mainClass="com.recipegrace.bheem.services.MakeWebRequest"
+args= "--input",work+searchLogDatasets+searchLogName, "--output",searchNavOutFolder+env+"/"+searchLogName,
+"--partitions","25","--queryType",env
+jarLocation= % "com.recipegrace.sa.el.search" % "bheem_2.11" % "2.1-SNAPSHOT" from rcartifactory
+}
+sparkjob webRequestToText(env,searchLogName) {
+mainClass="com.recipegrace.bheem.intermediate.SearchNavJSONToText"
+args= "--searchNav",searchNavOutFolder+env+"/"+searchLogName+"good",
+"--output",searchNavOutTextFolder+env+"/"+searchLogName
+jarLocation= % "com.recipegrace.sa.el.search" % "bheem_2.11" % "2.1-SNAPSHOT" from rcartifactory
+}
+cluster devClusterSearchRelevance {
+workers=3
+image="n1-standard-2"
+properties="spark:spark.executor.cores=2"
+}
+cluster prodClusterSearchRelevance {
+workers=4
+image="n1-standard-4"
+properties="spark:spark.executor.cores=4"
+initialScript = pythonFolder+"pyspark-search-eval-init.sh"
+initialScriptTimeOut = "600s"
+}
+pysparkjob twoway(env1,env2,searchLogName,algorithm) {
+mainPyFile=pythonFolder+"twowaysimilarity_spark.py"
+otherPyFiles= pythonFolder+"spark_wrapper.py",
+pythonFolder+"readers.py",pythonFolder+"custom_tokenize.py", pythonFolder+"text_similarity.py"
+args="--firstFile",searchNavOutTextFolder+env1+"/"+searchLogName,
+"--secondFile",searchNavOutTextFolder+env2+"/"+searchLogName,
+"--word2vecModel",pythonFolder+"models/word2vec_spark_v1.0",
+"--tfidfModel",pythonFolder+"models/tfidf_spark_v1.0",
+"--cvModel",pythonFolder+"models/cv_spark_v1.0",
+"--firstTag",env1,
+"--secondTag",env2,
+"--vectorAlgorithm",algorithm,
+"--outputFolder",evalFolder+algorithm+searchLogName
+}
+pysparkjob aggregatetwoway(env1, env2,searchLogName) {
+mainPyFile=pythonFolder+"aggregate_similarities_spark.py"
+otherPyFiles= pythonFolder+"spark_wrapper.py",
+pythonFolder+"readers.py",pythonFolder+"custom_tokenize.py", pythonFolder+"text_similarity.py"
+args="--firstTag",env1,"--secondTag",env2,
+"--outputFolder",evalFolder+"aggregated-twoway"+env1+env2+searchLogName,
+"--inputFolders",evalFolder+weighted_word2vec+searchLogName+"/"+
+","+evalFolder+word2vec+searchLogName+"/*"
+}
+pythonjob plot(tag1, tag2,searchLog) {
+mainPyFile="src/plot_two_way_summary.py"
+repository= "git@github.recipegrace.com:OLT-search/Kabali.git"
+repoBranch="master"
+container="ksrpk/python-gensim-gcloud"
+args = "--firstTag",tag1, "--secondTag",tag2,"--vectorAlgorithms","word2vec,weighted_word2vec","--inputFile","gs://mosambi/work/eval-reports/aggregated-twoway"+tag1+tag2+searchLog+"/"+tag1+"-"+tag2+"summary.csv"
+}
+pipeline twowaypipe(searchLog){
+run webRequestRunner(solrstage,searchLog) on prodClusterSearchRelevance
+run webRequestRunner(solrprod,searchLog) on prodClusterSearchRelevance
+run webRequestToText(solrstage,searchLog) on prodClusterSearchRelevance
+run webRequestToText(solrprod,searchLog) on prodClusterSearchRelevance
+run twoway(solrprod,solrstage,searchLog,"weighted_word2vec") on prodClusterSearchRelevance
+run twoway(solrprod,solrstage,searchLog,"word2vec") on prodClusterSearchRelevance
+run aggregatetwoway(solrprod,solrstage,searchLog) on prodClusterSearchRelevance
+run plot(solrprod,solrstage,"All-50k-morethan50.txt")
+}
+
+run twowaypipe("All-50k-morethan50.txt")
