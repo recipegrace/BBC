@@ -29,32 +29,27 @@ lazy val bbc = Project("BBC", file(".")) settings(
     "com.h2database" % "h2" % "1.4.192" % "test",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6"
   ),
-  publishTo := {
-    if (isSnapshot.value) Some(Opts.resolver.sonatypeSnapshots)
-    else Some(Opts.resolver.sonatypeStaging)
-  },
   credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password),
   pomIncludeRepository := { _ => false },
-  pomExtra := (
-    <url>https://feroshjacob.github.io</url>
-      <licenses>
-        <license>
-          <name>Apache License, Version 2.0</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
-      <scm>
-        <url>git@github.com:recipegrace/BBC.git</url>
-        <connection>scm:git:git@github.com:recipegrace/BBC.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>feroshjacob</id>
-          <name>Ferosh Jacob</name>
-          <url>https://feroshjacob.github.io</url>
-        </developer>
-      </developers>),
+  licenses := Seq("Apache 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false },
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  },
+    scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/recipegrace/BBC"),
+      "scm:git:git@github.com:recipegrace/BBC.git"
+    )
+    ),
+    developers := List(
+    Developer("fjacob", "Ferosh Jacob", "feroshjacob@gmail.com", url("https://feroshjacob.github.io"))
+    ),
   coverallsToken := Some(coverallToken),
   parallelExecution in Test := false,
     resolvers ++= Seq(Resolver.sonatypeRepo("releases")))

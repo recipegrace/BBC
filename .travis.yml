@@ -9,11 +9,11 @@ scala:
 jdk:
 - oraclejdk8
 script:
-- "./sbt ++$TRAVIS_SCALA_VERSION clean coverage test"
+- sbt ++$TRAVIS_SCALA_VERSION clean coverage test
 - if [ "$TRAVIS_BRANCH" == "master" ]; then ./sbt ++$TRAVIS_SCALA_VERSION publishSigned;
   fi
 after_success:
-- "./sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls"
+- sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
 notifications:
   email:
     recipients:
