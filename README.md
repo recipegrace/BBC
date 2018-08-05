@@ -4,7 +4,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.recipegrace/bigbricks-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.recipegrace/bigbricks-core_2.12)
 
 
-This project provide the DSL for [BigBrick](https://github.com/recipegrace/BigBricks) activiti wrapper for big data operations. More details soon!
+This project provide the DSL for [BigBrick](https://github.com/recipegrace/BigBricks) activiti and Concourse wrapper for big data operations. 
 
 ## Publications
 BBC: A DSL for Designing Cloud-based Heterogeneous Bigdata Pipelines, <i>IEEE International Conference on Big Data, Boston, 2017 </i>
