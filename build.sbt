@@ -39,8 +39,8 @@ lazy val bbc = Project("BBC", file(".")) settings(
     <url>https://feroshjacob.github.io</url>
       <licenses>
         <license>
-          <name>BSD-style</name>
-          <url>http://www.opensource.org/licenses/bsd-license.php</url>
+          <name>Apache License, Version 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
         </license>
       </licenses>

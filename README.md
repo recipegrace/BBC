@@ -1,5 +1,5 @@
 # BigBricks-core
-[![Build Status](https://travis-ci.org/recipegrace/BigBricks-core.svg?branch=master)](https://travis-ci.org/recipegrace/BigBricks-core)
+[![Build Status](https://travis-ci.org/recipegrace/BBC.svg?branch=master)](https://travis-ci.org/recipegrace/BBC)
 [![Coverage Status](https://coveralls.io/repos/github/recipegrace/BigBricks-core/badge.svg?branch=master)](https://coveralls.io/github/recipegrace/BigBricks-core?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.recipegrace/bigbricks-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.recipegrace/bigbricks-core_2.12)
 

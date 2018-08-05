@@ -17,5 +17,6 @@ after_success:
 - ./sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
 notifications:
   email:
-  - on_success: "always"
+    recipients:
+    - feroshjacob@gmail.com
 
