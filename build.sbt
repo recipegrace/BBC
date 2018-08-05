@@ -8,7 +8,7 @@ val activitiVersion = "5.17.0"
 val username = System.getenv().get("SONATYPE_USERNAME")
 val password = System.getenv().get("SONATYPE_PASSWORD")
 val coverallToken = System.getenv().get("COVERALL_TOKEN")
-val passphrase = System.getenv().get("PGP_PASS") match {
+val passphrase = System.getenv().get("PGP_PASSPHRASE") match {
   case x: String => x
   case null => ""
 }
@@ -16,6 +16,9 @@ val passphrase = System.getenv().get("PGP_PASS") match {
 lazy val bbc = Project("BBC", file(".")) settings(
   scalaVersion := currentScalaVersion,
   publishMavenStyle := true,
+  pgpPassphrase := Some( passphrase.toCharArray),
+  pgpSecretRing := file("secring.gpg"),
+  pgpPublicRing := file("pubring.gpg"),
   organization := organizationName,
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.4" % "test",
