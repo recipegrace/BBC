@@ -23,7 +23,7 @@ script:
 after_success:
 - if [ "$TRAVIS_BRANCH" == "master" ]; then
       sbt publishSigned;
-      sbt coverageReport coveralls;
+      sbt coverage coverageReport coveralls;
   fi
 
 notifications:
