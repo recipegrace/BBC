@@ -21,7 +21,9 @@ script:
 - sbt ++$TRAVIS_SCALA_VERSION clean test
 
 after_success:
-- if [ "$TRAVIS_BRANCH" == "master" ]; then sbt ++$TRAVIS_SCALA_VERSION publishSigned;sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
+- if [ "$TRAVIS_BRANCH" == "master" ]; then
+     sbt ++$TRAVIS_SCALA_VERSION publishSigned
+     sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
   fi
 
 notifications:
