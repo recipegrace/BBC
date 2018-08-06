@@ -1,7 +1,7 @@
 package com.recipegrace.bbc
 
 import java.io.Reader
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 
 import com.recipegrace.bbc.grmr.{BBC, BBCGrammar}
 import com.recipegrace.bbc.grmr.BBCStructures.VariableDeclaration
@@ -36,6 +36,7 @@ object ActivitiMain extends BBCGrammar {
         case Success(result, _) => {
 
           val xml = GenerateFlows(result).generateActiviti
+          logger.setLevel(Level.OFF)
           logger.info("parse success!")
           variables= result.variables
           errorMessage=""
@@ -43,16 +44,19 @@ object ActivitiMain extends BBCGrammar {
         }
         case Failure(msg, _) => {
           errorMessage = msg
+          logger.setLevel(Level.SEVERE)
           logger.info("parse error:" + errorMessage)
           None
         }
         case Error(msg, _) => {
+          logger.setLevel(Level.SEVERE)
           logger.info("ERROR:" + msg)
           None
         }
       }
     } catch {
       case x: Throwable => {
+        logger.setLevel(Level.SEVERE)
         logger.info("parse error:" + x.getMessage)
         errorMessage = x.getMessage
         None

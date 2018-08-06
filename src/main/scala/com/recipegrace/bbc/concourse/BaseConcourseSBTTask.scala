@@ -24,7 +24,7 @@ trait BaseConcourseSBTTask  extends ExpressionCreator with ClusterServiceTask {
       case x:RepositoryJobConfigArgs => x.args.map(f=> evaluateVariable(f,localVariables)).toList
       case _ => List()
     })
-    val withMainClass = List("runMain",  (mainClass:: variablesEvaluated).mkString(" ")).mkString("\""," ", "\"")
+    val withMainClass = List(List("runMain",  (mainClass:: variablesEvaluated).mkString(" ")).mkString("\""," ", "\""))
     val container:Any =evaluateVariable ( sbtJob.sbtJob.container, localVariables)
 
     val resourceName =  sbtJob.name+"-resource"

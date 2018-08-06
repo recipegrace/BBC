@@ -44,7 +44,7 @@ class ActivitiTrialsTest extends BaseTest {
       <serviceTask name="DeleteGCSLocationTask2" activiti:class="com.recipegrace.bbc.activiti.ExampleDelegate" id="serviceTask2">
         <extensionElements>
           <activiti:field name="url">
-            <activiti:expression>${customerNameVar}${"ferosh"}${customerNameVar}</activiti:expression>
+            <activiti:expression>${customerNameVar}${"hello"}${customerNameVar}</activiti:expression>
            </activiti:field>
         </extensionElements>
        </serviceTask>
@@ -70,7 +70,7 @@ class ActivitiTrialsTest extends BaseTest {
 
 
     val map = new util.HashMap[String, Object]()
-    map.put("customerNameVar", "ferosh")
+    map.put("customerNameVar", "hello1")
     val process = processEngine.getRuntimeService.startProcessInstanceByKey(processId, map)
 
     processEngine.getHistoryService.createHistoricProcessInstanceQuery()

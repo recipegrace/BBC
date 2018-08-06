@@ -4,9 +4,9 @@
 
         sbtjob example {
                  mainClass="com.hello.HelloWorld"
-                 repository= "git@github.recipegrace.com:OLT-search/Judas.git"
+                 repository= "git@github.recipegrace.com:OLT-search/Alexis.git"
                  repoBranch="master"
-                 container="ksrpk/python-gensim-gcloud"
+                 container="recipegrace/bigbricks-docker"
                  args = "--this", "will", "--may", "work"
                  }
 
