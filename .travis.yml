@@ -15,9 +15,9 @@ before_install:
   -d
 script:
 - sbt clean test
+- sbt test coverage coverageReport coveralls
 after_success:
-- if [ "$TRAVIS_BRANCH" == "master" ]; then sbt publishSigned; sbt test coverage coverageReport
-  coveralls; fi
+- if [ "$TRAVIS_BRANCH" == "master" ]; then sbt publishSigned; fi
 notifications:
   email:
     recipients:
