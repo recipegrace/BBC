@@ -18,12 +18,12 @@ before_install:
 - openssl aes-256-cbc -pass pass:$PGP_PASSPHRASE -in pubring.gpg.enc -out pubring.gpg -d
 
 script:
-- sbt ++$TRAVIS_SCALA_VERSION clean test
+- sbt $TRAVIS_SCALA_VERSION clean test
 
 after_success:
 - if [ "$TRAVIS_BRANCH" == "master" ]; then
-     sbt ++$TRAVIS_SCALA_VERSION publishSigned
-     sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
+      sbt $TRAVIS_SCALA_VERSION publishSigned;
+      sbt $TRAVIS_SCALA_VERSION coverageReport coveralls;
   fi
 
 notifications:
