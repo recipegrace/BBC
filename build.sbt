@@ -42,6 +42,7 @@ lazy val bbc = Project("BBC", file(".")) settings(
     else
       Some("releases"  at nexus + "service/local/staging/deploy/maven2")
   },
+  homepage := Some(url("https://github.com/recipegrace/BBC")),
     scmInfo := Some(
     ScmInfo(
       url("https://github.com/recipegrace/BBC"),
