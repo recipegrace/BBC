@@ -15,6 +15,7 @@ val passphrase = System.getenv().get("PGP_PASSPHRASE") match {
 
 lazy val bbc = Project("BBC", file(".")) settings(
   scalaVersion := currentScalaVersion,
+  coverallsServiceName := Some("travis-pro"),
   publishMavenStyle := true,
   pgpPassphrase := Some( passphrase.toCharArray),
   pgpSecretRing := file("secring.gpg"),
