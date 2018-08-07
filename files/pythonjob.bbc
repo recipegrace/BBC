@@ -2,16 +2,16 @@
         zone="east"
         env="stage"
 
-        pythonjob example {
+        pythonjob example(a,b) {
                  mainPyFile="src/two_way_similarity.py"
                  repository= "git@github.recipegrace.com:OLT-search/Judas.git"
                  repoBranch="master"
                  container="ksrpk/python-gensim-gcloud"
-                 args = "--this", "will", "--may", "work"
+                 args = "--this", "will", "--may", "work", a, b
                  }
 
 
 
 
-        run example
-        run example
+        run example("first", "second")
+        run example("one", "two")

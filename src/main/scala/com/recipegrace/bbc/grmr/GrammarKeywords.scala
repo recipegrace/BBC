@@ -46,6 +46,7 @@ trait GrammarKeywords {
   val CLOSECURLY = "}"
   val COMMA = ","
   val VAR ="var"
+  val JSON ="json"
   val TRUE ="true"
   val FALSE = "false"
   val PLUS="+"
@@ -53,4 +54,6 @@ trait GrammarKeywords {
   val DOUBLEQUAL="=="
   val openBracket="("
   val closeBracket=")"
+  val WEBSERVICEPOST = "webservicepost"
+  val WEBSERVICEGET = "webserviceget"
 }

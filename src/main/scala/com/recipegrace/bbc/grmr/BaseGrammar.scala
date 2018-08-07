@@ -4,12 +4,20 @@ import com.recipegrace.bbc.grmr.BBCStructures.{VariableDeclaration, _}
 import com.recipegrace.bbc.grmr.Expressions._
 
 import scala.util.parsing.combinator.JavaTokenParsers
+import scala.util.parsing.json.Parser
 
-/**
-  * Created by Ferosh Jacob on 12/29/16.
-  */
+
+
 trait BaseGrammar extends JavaTokenParsers with GrammarKeywords {
   /*Variables*/
+
+
+  def _json       = jsonObj | jsonArray
+  def jsonObj    = "{" ~> repsep(objEntry, ",") <~ "}" ^^ { case vals : List[_] => JSONObject(Map(vals : _*)) }
+  def jsonArray  = "[" ~> repsep(jsonValue, ",") <~ "]" ^^ { case vals : List[_] => JSONArray(vals) }
+  def objEntry   = stringLiteral ~ (":" ~> jsonValue) ^^ { case x ~ y => (x, y) }
+  def jsonValue: Parser[Any] = jsonObj | jsonArray | wholeNumber | "true" ^^^ true | "false" ^^^ false | "null" ^^^ null | stringLiteral
+
 
 
   def _fraction: Parser[String]  ="""[+-]?[0-9]*((\.[0-9]+([eE][+-]?[0-9]+)?[fF]?)|([fF])|([eE][+‌​-]?[0-9]+))\b""".r
@@ -29,14 +37,21 @@ trait BaseGrammar extends JavaTokenParsers with GrammarKeywords {
     NumberExpression(f.toInt)
   })
     | ident ^^(f=> VariableExpression(f))
-    |stringLiteral ^^ (f=> StringExpression(unStripQuote(f))))
+    |stringLiteral ^^ (f=> StringExpression(unStripQuote(f)))
+    |_json ^^ (f=> f)
+    )
 
 
 
   def _expression:Parser[Expression] =  _term ~ rep(s"[$PLUS]".r ~ _term) ^^ (f=> {
 
     if(f._2.isEmpty) f._1
-    else ConcatStringExpression(f._1:: f._2.map(f=>f._2))
+    else {
+      assert((f._1::f._2.map(f=>f._2)).forall(f=>f.isInstanceOf[StringExpression] ||f.isInstanceOf[VariableExpression]),s"+ operation defined only for string variables but found: ${
+        (f._1.getClass.getSimpleName.split("\\.").last.split("\\$").last :: f._2.map(f=>f._2.getClass.getSimpleName.split("\\.").last.split("\\$").last))
+      .distinct.mkString(",")}" )
+      ConcatStringExpression(f._1:: f._2.map(f=>f._2))
+    }
   })
 
 
@@ -90,5 +105,10 @@ trait BaseGrammar extends JavaTokenParsers with GrammarKeywords {
     (VAR, VariableDeclarations(f._2))
   })
 
+
+
+
 }
+
+
 

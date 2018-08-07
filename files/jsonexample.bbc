@@ -1,0 +1,34 @@
+        name="1"
+        zone="east"
+        env="stage"
+
+
+      var  example = {
+                        "message": {
+                          "workflow": "Deploy-api",
+                          "Artifact": "solr",
+                          "Application": "thdsample",
+                          "Collection": "thdsample",
+                          "Version": "atl",
+                          "Image": "solr-20180524190808",
+                          "Regions": [
+                            "us-east1","us-central1"
+                          ],
+                          "DeployType": "SOLR",
+                          "TargetProject": "hd-loyalty-stage",
+                          "HealthcheckURI": "/solr-api/admin/health",
+                          "DiskSize": "100",
+                          "MachineType": "n1-highmem-8",
+                          "Autoscaling":true,
+                          "Autohealing":true,
+                          "MaxNumReplicas":"7",
+                          "TargetSize": "1"
+                        },
+                        "attributes": {
+                          "Type": "workflow",
+                          "AllowMultiple": "true",
+                          "Replacement": "true"
+                        }
+                      }
+
+        delete "gs://hello.txt"

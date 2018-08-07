@@ -37,13 +37,14 @@ trait BBCGrammar  extends BaseGrammar{
   /*
     Declations cluster,spark job,nexus, variables
    */
-  def _declarations: Parser[(String,Declaration)] = _clusterBody | _sparkJobBody | _pySparkJobBody| _pyJobBody|_javaJobBody |_pipelineJobBody|
-    _nexusBody|_artifactoryBody|_variableDeclarations  ^^ (f => f)
+  def _declarations: Parser[(String,Declaration)] = _clusterBody | _sparkJobBody | _pySparkJobBody| _pyJobBody|_sbtJobBody |_pipelineJobBody| _webservicePostBody| _webserviceGetBody|
+    _nexusBody|_artifactoryBody|_variableDeclarations ^^ (f => f)
 
 
   /*
   Cluster
    */
+
   def _clusterBody: Parser[(String,Cluster)] = CLUSTER ~ ident ~ OPENCURLY ~ rep(_clusterStatements) ~ CLOSECURLY ^^ (f => (f._1._1._1._2, Cluster(autoId, f._1._1._1._2, f._1._2)))
   def _clusterStatements: Parser[ClusterConfig] =
     (NUMWORKERS ~ EQUAL ~ wholeNumber ^^ (f => {
@@ -120,9 +121,39 @@ trait BBCGrammar  extends BaseGrammar{
 
 
   //JavaJob
-  def _javaJobBody: Parser[(String,SBTJob)] = SBTJOB ~ ident ~opt(_defVariableDeclaration)~ OPENCURLY ~ rep(_javaJobStatements) ~ CLOSECURLY ^^ (f => {
+  def _sbtJobBody: Parser[(String,SBTJob)] = SBTJOB ~ ident ~opt(_defVariableDeclaration)~ OPENCURLY ~ rep(_javaJobStatements) ~ CLOSECURLY ^^ (f => {
     (f._1._1._1._1._2, SBTJob(f._1._1._1._1._2, f._1._2,f._1._1._1._2.getOrElse(List())))
   })
+
+  //Webservice
+  def _webservicePostBody: Parser[(String,WebservicePostJob)] = WEBSERVICEPOST ~ ident ~opt(_defVariableDeclaration)~ OPENCURLY ~ rep(_webservicePostStatements) ~ CLOSECURLY ^^ (f => {
+    (f._1._1._1._1._2, WebservicePostJob(f._1._1._1._1._2,f._1._2,f._1._1._1._2.getOrElse(List())))
+  })
+
+  def _webserviceGetBody: Parser[(String,WebserviceGetJob)] = WEBSERVICEGET ~ ident ~opt(_defVariableDeclaration)~ OPENCURLY ~ rep(_webserviceGetStatements) ~ CLOSECURLY ^^ (f => {
+    (f._1._1._1._1._2, WebserviceGetJob(f._1._1._1._1._2,f._1._2,f._1._1._1._2.getOrElse(List())))
+  })
+
+
+  def _webservicePostStatements: Parser[WebserviceJobConfig] =
+    (URL ~ EQUAL ~ _expression ^^ (f => {
+      WebserviceJobURLConfig(f._2)
+    })) |
+      (JSON ~ EQUAL ~ _json ^^ (f => {
+        WebservicePostJobDataConfig(f._2)
+      }))
+
+  def _webserviceGetStatements: Parser[WebserviceJobConfig] =
+    (URL ~ EQUAL ~ _expression ^^ (f => {
+      WebserviceJobURLConfig(f._2)
+    })) |
+      ARGS ~ EQUAL ~ repsep(_expression, COMMA) ^^ (f => {
+        val stripped = f._2.map(f => f).toArray
+        WebserviceGetJobConfigArgs(stripped)
+      })
+
+
+
 
   def _javaJobStatements: Parser[RepositoryJobConfig] =
     (MAINCLASS ~ EQUAL ~ _expression ^^ (f => {

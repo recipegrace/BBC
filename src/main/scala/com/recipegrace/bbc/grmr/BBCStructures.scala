@@ -26,6 +26,7 @@ object BBCStructures {
   sealed trait RepositoryJobConfig
   sealed trait PyJobConfig extends RepositoryJobConfig
   sealed trait SBTJobConfig extends RepositoryJobConfig
+  sealed trait WebserviceJobConfig
   sealed trait PySparkJobConfig
 
   sealed trait Location
@@ -92,6 +93,11 @@ object BBCStructures {
   case class SBTJobConfigMainClass(mainClass: Expression) extends SBTJobConfig
 
 
+  case class WebserviceJobURLConfig(url:Expression) extends WebserviceJobConfig
+  case class WebservicePostJobDataConfig(json:JSONType) extends WebserviceJobConfig
+  case class WebserviceGetJobConfigArgs(args: Array[Expression]) extends WebserviceJobConfig
+
+
   case class GitRepository(repository:String, branch:String,name:String)
 
   abstract class ClusterJob(name:String,variables:List[String]) extends Declaration {
@@ -112,6 +118,9 @@ object BBCStructures {
                             branch:Expression, name:String) extends RepositoryJobWrapper(repository,container,branch,name)
   case class SBTJobWrapper(mainClass:Expression,  repository:Expression, branch:Expression,
                             container:Expression,name:String) extends RepositoryJobWrapper(repository,container,branch,name)
+
+  case class WebservicePostJobWrapper(url:Expression, json:JSONType)
+  case class WebserviceGetJobWrapper(url:Expression)
 
 
   abstract class RepositoryJob(name:String,variables:List[String],repositoryJobConfigs:List[RepositoryJobConfig]) extends Declaration {
@@ -163,6 +172,33 @@ object BBCStructures {
     }
   }
 
+  case class WebservicePostJob(name: String, webserviceJobConfigs: List[WebserviceJobConfig], variables:List[String]) extends Declaration {
+    lazy val sbtJob = calculateWrapper()
+
+    def calculateWrapper() = {
+      val webserviceConfigs = webserviceJobConfigs
+        .map {
+          case x: WebserviceJobURLConfig => URL -> x.url
+          case x: WebservicePostJobDataConfig => JSON -> x.json
+          case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
+
+        }.toMap
+      WebservicePostJobWrapper(webserviceConfigs(URL), webserviceConfigs(JSON).asInstanceOf[JSONType])
+    }
+  }
+  case class WebserviceGetJob(name: String, webserviceJobConfigs: List[WebserviceJobConfig], variables:List[String]) extends Declaration {
+    lazy val sbtJob = calculateWrapper()
+
+    def calculateWrapper() = {
+      val webserviceConfigs = webserviceJobConfigs
+        .map {
+          case x: WebserviceJobURLConfig => URL -> x.url
+          case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
+
+        }.toMap
+      WebserviceGetJobWrapper(webserviceConfigs(URL))
+    }
+  }
   case class GCloudLocation(bucketLocation: String)
 
   case class RepositoryLocation(groupId: Expression, artifactId: Expression, version: Expression, repository: Repository)
@@ -207,6 +243,8 @@ object BBCStructures {
   case class VariableDeclarations (variables:List[VariableDeclaration]) extends Declaration
 
 
+
+  case class JSONDeclaration(name: String, content: JSONType with Product with Serializable) extends Declaration
   case class DeleteGCSFolderAction(folder: Expression, identifier: Int) extends ActionTypeWithId(identifier)
 
   case class RunJobAction(job: String, cluster: Option[String], identifier: Int, variables:List[Expression]) extends ActionTypeWithId(identifier)

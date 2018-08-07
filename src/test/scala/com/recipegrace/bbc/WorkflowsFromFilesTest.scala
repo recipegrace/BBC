@@ -52,6 +52,13 @@ class WorkflowsFromFilesTest extends BaseWorkflowTest {
 
   }
 
+  test("json (concourse)") {
+
+    val fileName = "jsonexample.bbc"
+    printOutConcoursePipeLine(fileName)
+
+  }
+
   test("main file test (concourse) pyspark") {
 
     val fileName1 = "pysparkjob.bbc"

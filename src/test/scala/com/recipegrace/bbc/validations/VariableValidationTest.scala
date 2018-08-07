@@ -22,6 +22,9 @@ class VariableValidationTest extends BaseWorkflowTest{
     assertErrorOnParser(_variableDeclarations,"only string variables are supported","var a=10+2.0")
     assertErrorOnParser(_variableDeclarations,"only string variables are supported","var a=10.0+\"s\"")
     assertErrorOnParser(_variableDeclarations,"only string variables are supported","var a=10.0+2")
+    assertErrorOnParser(_variableDeclarations,"+ operation defined only for string variables but found: JSONObject","""var x1 = {"a": "b"} + {"c": "d"}""")
+    assertErrorOnParser(_variableDeclarations,"+ operation defined only for string variables but found: StringExpression,JSONObject","""var x1 = "hello" + {"c": "d"}""")
+    assertErrorOnParser(_variableDeclarations,"only string variables are supported","""var x1 = 3 + {"c": "d"}""")
 
   }
   test("already declared") {
