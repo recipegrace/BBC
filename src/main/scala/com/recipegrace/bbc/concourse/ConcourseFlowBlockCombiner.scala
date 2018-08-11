@@ -12,7 +12,7 @@ import scala.xml.NodeSeq
 /**
   * Created by Ferosh Jacob on 11/23/16.
   */
-object ConcourseFlowBlockCombiner {
+object ConcourseFlowBlockCombiner extends ResourceNameGenerator {
   val logger = Logger.getLogger(this.getClass.getName)
 
 
@@ -33,19 +33,21 @@ object ConcourseFlowBlockCombiner {
 
   def convertToConcourseResources(f:List[GitRepository]) = {
 
-    f.map(f=> Map("name"-> (f.name+"-resource" ), "type" -> "git", "source" -> Map ("uri"->f.repository, "branch" -> f.branch,
+    f.map(f=> Map("name"-> createResourceName(f.repository,f.branch) , "type" -> "git", "source" -> Map ("uri"->f.repository, "branch" -> f.branch,
       "private_key" ->"{{github-private-key}}"), "check_every"->"24h","webhook_token"->"oltsearchwebhooktoken" ))
   }
   def convertToConCourseJob(f: List[FlowBlock],name:String,gitResources:List[GitRepository]) = {
 
-    val yaml = gitResources.map(f=>  Map("get" -> (f.name+"-resource"), "trigger" ->"false"))++f.flatMap(g=>g.toYAML)
+    val yaml = gitResources.map(f=>  Map("get" -> createResourceName(f.repository,f.branch) ,  "trigger" ->"false"))++f.flatMap(g=>g.toYAML)
     Map("name"-> name,"serial"->"true", "plan"->yaml)
   }
 
 
-  def mergeYAML(flowBlocks: List[FlowBlock], gitResources:List[GitRepository], name: String) = {
+  def mergeYAML(flowBlocks: List[FlowBlock], gitResourcesUnFiltered:List[GitRepository], name: String) = {
 
 
+
+    val gitResources = gitResourcesUnFiltered.groupBy(f=>(f.branch, f.repository)).map(f=> f._2.head).toList
 
     val sparkJobs = flowBlocks.filter(f=> f match {
       case x:NexusDownloadFlowBlock => false

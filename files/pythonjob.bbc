@@ -2,9 +2,24 @@
         zone="east"
         env="stage"
 
-        pythonjob example(a,b) {
+
+       pythonjob example1(a,b) {
                  mainPyFile="src/two_way_similarity.py"
                  repository= "git@github.recipegrace.com:OLT-search/Judas.git"
+                 repoBranch="master"
+                 container="ksrpk/python-gensim-gcloud"
+                 args = "--this", "will", "--may", "work", a, b
+                 }
+        pythonjob example2(a,b) {
+                 mainPyFile="src/two_way_similarity.py"
+                 repository= "git@github.recipegrace.com:OLT-search/Judas.git"
+                 repoBranch="master"
+                 container="ksrpk/python-gensim-gcloud"
+                 args = "--this", "will", "--may", "work", a, b
+                 }
+        pythonjob example3(a,b) {
+                 mainPyFile="src/two_way_similarity.py"
+                 repository= "git@github.recipegrace.com:OLT-search/Judas1.git"
                  repoBranch="master"
                  container="ksrpk/python-gensim-gcloud"
                  args = "--this", "will", "--may", "work", a, b
@@ -12,6 +27,6 @@
 
 
 
-
-        run example("first", "second")
-        run example("one", "two")
+        run example1("first", "second")
+        run example2("one", "two")
+        run example3("one", "two")

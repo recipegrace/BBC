@@ -9,7 +9,7 @@ import com.recipegrace.bbc.workflow.ProgramConfiguration
 /**
   * Created by Ferosh Jacob on 2/4/17.
   */
-trait BaseConcoursePythonTask  extends ExpressionCreator with ClusterServiceTask {
+trait BaseConcoursePythonTask  extends ExpressionCreator with ClusterServiceTask with ResourceNameGenerator{
 
 
   def createBasePythonConcourseTask(id:Int, displayName:String, pyJob: PyJob, localVariables:Map[String,Expression], clusterStore: ClusterStore, config:ProgramConfiguration):List[Map[String,Any]] = {
@@ -26,7 +26,9 @@ trait BaseConcoursePythonTask  extends ExpressionCreator with ClusterServiceTask
       case _ => List()
     })
 
-    val resourceName =  pyJob.name+"-resource"
+    val gitRepo =evaluateVariable ( pyJob.pyJob.repository, localVariables)
+    val gitBranch = evaluateVariable(pyJob.pyJob.branch,localVariables)
+    val resourceName =  createResourceName(gitRepo.toString,gitBranch.toString)
     val params = Map("PROXYPORT"->"{{proxy-port}}", "PROXYURL"->"{{proxy-url}}","GCPTOKEN" -> "{{gcp-token}}", "GITHDTOKEN" ->"{{github-private-key}}" )
 
     val configs= Map("params" -> params,
