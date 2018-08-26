@@ -23,7 +23,7 @@ class WorkflowExampleTest extends BaseWorkflowTest {
       """.stripMargin
     val xml = createActivitWorkFlow(dsl)
     val yaml = createConcourseWorkFlow(dsl)
-    createComposerWorkFlow(dsl)
+   
     yaml.get.nonEmpty shouldBe true
   }
 

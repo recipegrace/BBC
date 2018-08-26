@@ -65,12 +65,7 @@ trait BaseWorkflowTest extends BaseTest with BBCGrammar with ExpressionCreator {
 
     ConcourseMain.generateProcess(dsl)
   }
-  def createComposerWorkFlow(dsl: String) = {
 
-    val writer = new FileWriter(".tests/output.txt")
-    writer.append(ComposerMain.generateProcess(dsl).get)
-    writer.close()
-  }
 
   def isValidActivitiWorkflow(dsl: String) = {
     val bbc = parseAll(_bbc, dsl).get
