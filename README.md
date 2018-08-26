@@ -5,9 +5,10 @@
 
 
 This project provide the DSL for [BigBrick](https://github.com/recipegrace/BigBricks) 
-[airflow](https://airflow.apache.org), [activiti](https://www.activiti.org) and Concourse (https://concourse-ci.org)wrapper for big data operations. 
+[airflow](https://airflow.apache.org), [activiti](https://www.activiti.org) and [Concourse] (https://concourse-ci.org) wrappers for big data + cloud operations. 
 
 ## Publications
 BBC: A DSL for Designing Cloud-based Heterogeneous Bigdata Pipelines, <i>IEEE International Conference on Big Data, Boston, 2017 </i>
 Ferosh Jacob, Ilamgumaran Karunanithi, Pramod Salian, and Ravi Sambhu
 
+The DSL examples can be found in the files folder for several integrations. 
