@@ -23,14 +23,13 @@ class WorkflowsFromFilesTest extends BaseWorkflowTest {
 
     val main =if(concourse) ConcourseMain else ComposerMain
     val content = main.generateProcess(new FileReader("files/" + fileName))
-    //val content = main.generateProcess(new FileReader("/tmp/recall-relevance-slow.bbc"))
 
     main.errorMessage shouldBe ""
     main.generateFlows.clusterStore.running shouldBe List()
-    println(content.get)
-    val writer = new FileWriter(".tests/output.txt")
-    writer.append(content.get)
-    writer.close()
+    //println(content.get)
+    //val writer = new FileWriter(".tests/output.txt")
+    //writer.append(content.get)
+    //writer.close()
   }
 
   test("main file test (concourse)") {
