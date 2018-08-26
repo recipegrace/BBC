@@ -4,8 +4,13 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.recipegrace/bigbricks-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.recipegrace/bigbricks-core_2.12)
 
 
-This project provide the DSL for [BigBrick](https://github.com/recipegrace/BigBricks) 
-[airflow](https://airflow.apache.org), [activiti](https://www.activiti.org) and [Concourse](https://concourse-ci.org) wrappers for big data + cloud operations. 
+This project provide the DSL for generating workflows for big data + cloud operations. The workflows can be generated in any of the workflow systems. 
+* [airflow](https://airflow.apache.org)  
+* [activiti](https://www.activiti.org) 
+* [Concourse](https://concourse-ci.org)
+
+A wrapper for writing WORA(Write Once and Run Anywhere) Spark Jobs can be found here, 
+ [BigBrick](https://github.com/recipegrace/BigBricks) 
 
 ## Publications
 BBC: A DSL for Designing Cloud-based Heterogeneous Bigdata Pipelines, <i>IEEE International Conference on Big Data, Boston, 2017 </i>
