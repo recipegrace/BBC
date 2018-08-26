@@ -5,7 +5,7 @@ package com.recipegrace.bbc.grmr
   */
 
 import com.recipegrace.bbc.grmr.BBCStructures._
-import com.recipegrace.bbc.grmr.Expressions.StringExpression
+import com.recipegrace.bbc.grmr.Expressions.{StringExpression, VariableExpression}
 
 class BBCJobTest extends BaseBBCGrammarTest  {
 
@@ -77,7 +77,7 @@ class BBCJobTest extends BaseBBCGrammarTest  {
       case SparkJobConfigClassName(StringExpression(x)) => x shouldBe className
       case SparkJobConfigProps(StringExpression(x)) => x shouldBe sparkProps
       case SparkJobConfigJarURI(StringExpression(x)) => x shouldBe jarURI
-      case SparkJobConfigArgs(x) => x.map(f=> f.value).mkString shouldBe programArguments.mkString
+      case ArgumentSparkJobConfig(x) => x.map(f=> f.value).mkString shouldBe programArguments.mkString
     }
   }
 
@@ -106,7 +106,7 @@ class BBCJobTest extends BaseBBCGrammarTest  {
       case PySparkJobConfigProps(StringExpression(x)) => x shouldBe sparkProps
       case PySparkJobConfigOtherPyFiles(x) =>x.map(f=> f.value).mkString shouldBe otherPyFiles.mkString
 
-      case PySparkJobConfigArgs(x) => x.map(f=> f.value).mkString shouldBe programArguments.mkString
+      case ArgumentSparkJobConfig(x) => x.map(f=> f.value).mkString shouldBe programArguments.mkString
     }
   }
   test("simple sbtjob  submission test") {
@@ -263,6 +263,35 @@ class BBCJobTest extends BaseBBCGrammarTest  {
     job._2.webserviceJobConfigs.foreach {
       case WebserviceGetJobConfigArgs(x)=> x.map(f=> f.value).mkString shouldBe programArguments.mkString
       case WebserviceJobURLConfig(StringExpression(x)) => x shouldBe url
+
+    }
+  }
+
+  test("simple javajob test") {
+    val mainClass = "sample.py"
+    val programArguments = Array("arg1", "arg2")
+    val jobName = "Zjob"
+    val jarLocation = "someplace"
+    val properties = "properties"
+    val jobDefintiion =
+      s"""javajob $jobName {
+        mainClass="$mainClass"
+       args= ${programArguments.map(f => "\"" + f + "\"").mkString(",")}
+       jarLocation = $jarLocation
+         props = $properties
+        }
+      """.stripMargin
+
+
+    val job = parseAll(_javaJobBody, jobDefintiion).get
+
+    job._2.name shouldBe jobName
+
+    job._2.javaJobConfigs.foreach {
+      case ArgumentJavaJobConfig(x)=> x.map(f=> f.value).mkString shouldBe programArguments.mkString
+      case MainClassJavaJobConfig(StringExpression(x)) => x shouldBe mainClass
+      case JarLocationJavaJobConfig(VariableExpression(x)) => x shouldBe jarLocation
+      case PropertiesJavaJobConfig  (VariableExpression(x)) => x shouldBe properties
 
     }
   }

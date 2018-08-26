@@ -7,6 +7,7 @@ cloudWorkspace="gs://mosambi"
     var output = "temp"
     pysparkjob example {
         mainPyFile="gs://mosambi/work/python/twowaysimilarity_spark.py"
+        props = "-Xmx20"
         args="--firstFile","gs://mosambi/work/base.csv",
                      "--secondFile","gs://mosambi/work/change.csv",
                    "--word2vecModel","gs://mosambi/work/python/models/word2vec_spark_v1.0",

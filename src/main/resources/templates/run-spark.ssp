@@ -1,0 +1,25 @@
+<%@ var programConfiguration:com.recipegrace.bbc.workflow.ProgramConfiguration %>
+<%@ var clusterName:String %>
+<%@ var sparkJob:com.recipegrace.bbc.grmr.BBCStructures.SparkJob %>
+<%@ var localVariables:Map[String, com.recipegrace.bbc.grmr.Expressions.Expression] %>
+<%@ var evalObject: com.recipegrace.bbc.codegen.ExpressionCreator%>
+<%@ val sparkProperties:String= evalObject.evaluateVariable(sparkJob.sparkJob.props,localVariables).toString%>
+<%@ val hasArguments:Boolean = sparkJob.sparkJob.args.nonEmpty%>
+<%@ var name: String%>
+<%@ val jarLocationCalculated: String  = sparkJob.sparkJob.repository match {
+case Some(x) =>  {
+    val elements = x.map(f=> evalObject.evaluateVariable(f,localVariables))
+   programConfiguration.cloudWorkspace.get.value + "/" + elements.head+ "-" + elements(1) + ".jar"
+}
+case _ => evalObject.evaluateVariable(sparkJob.sparkJob.jarLocation.get, localVariables).toString
+}%>
+
+  ${name} = dataproc_operator.DataProcSparkOperator(
+    task_id='submit_spark_${name}',
+    dataproc_spark_jars=['${jarLocationCalculated}'],
+    main_class='${sparkJob.sparkJob.mainClass}',
+    job_name='submit_spark_${sparkJob.name}',
+    #if(hasArguments)arguments=[${ sparkJob.sparkJob.args.get.map(f=> "'"+evalObject.evaluateVariable(f,localVariables )+"'").mkString(",")}],
+    #end#if(sparkProperties.nonEmpty)dataproc_spark_properties='${sparkProperties}',
+    #endcluster_name='${clusterName}'.lower()
+  )

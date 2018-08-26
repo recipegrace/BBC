@@ -12,7 +12,7 @@ class DeleteGCSActionBlockTest extends BaseTest {
 
   test("display name delete") {
     val example = "one"
-    val deleteGCSActionBlock = new DeleteGCSActionFlowBlock(null,StringExpression(s"gs://hello/$example"))
+    val deleteGCSActionBlock = new DeleteGCSActionFlowBlock(null,StringExpression(s"gs://hello/$example"), Map())
 
     deleteGCSActionBlock.getLastPart shouldBe example
   }

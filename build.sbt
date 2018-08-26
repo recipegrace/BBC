@@ -25,6 +25,7 @@ lazy val bbc = Project("BBC", file(".")) settings(
     "org.scalatest" %% "scalatest" % "3.0.4" % "test",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     "org.yaml" % "snakeyaml" % "1.14",
+    "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
     "org.activiti" % "activiti-engine" % activitiVersion % "test",
     "org.slf4j" % "slf4j-log4j12" % "1.7.21" % "test",
     "com.h2database" % "h2" % "1.4.192" % "test",

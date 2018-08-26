@@ -6,21 +6,17 @@ cloudWorkspace="gs://mosambi"
     var mosambi = "gs://mosambi"
     var output = mosambi + "/nlpout/sherindatasetnlp"
 
-    artifactory rcArtifactory {
-        url="https://maven.artifactory.recipegrace.com"
-        repository="snapshots"
-
-    }
     sparkjob nlpRunner {
         mainClass="com.recipegrace.sa.el.search.nlpapirunner.darshan.NLPRunner"
         args= "--inputFile",mosambi+"sherindataset.txt","--nlpFile",mosambi+"nlpContent.zip","--output",output,"--partitions","500","--dataset","sherin"
-        jarLocation= % "com.recipegrace.sa.el.burette" % "nlpapirunner_2.11" % "0.0.3-SNAPSHOT" from rcArtifactory
+        jarLocation= "gs://mosamds/sdsds/ot.jar"
     }
     cluster simpleCluster {
         workers=2
         image="n1-standard-2"
         properties="spark:spark.executor.cores=2"
+        version="somethingortheother"
     }
 
-        delete output
+
          run nlpRunner on  simpleCluster

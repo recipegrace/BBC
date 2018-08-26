@@ -1,17 +1,16 @@
-        name="1"
-        zone="east"
-        env="stage"
-
-        var c = "three"
-        sbtjob example (a, b,c) {
-                 mainClass="com.hello.HelloWorld"
-                 repository= "git@github.recipegrace.com:OLT-search/Alexis.git"
-                 repoBranch="master"
-                 container="recipegrace/bigbricks-docker"
-                 args = "--this", "will", "--may", "work", a, b, c
-                 }
+name="CreateDataTest"
+env="rc-www-search"
+zone="us-east1-c"
 
 
 
 
-        run example("one", "two","four")
+    javajob javajobtest {
+        mainClass="com.recipegrace.biglibrary.gasexamples.SimpleGoogleCloudOps"
+        args= "--input" ,"gs://hd-srch-dev-mosambi/terms.txt", "--output" ,"gs://hd-srch-dev-mosambi/work/test/awesome.txt"
+        jarLocation= "gs://hd-srch-dev-mosambi/GasExamples-0.0.7-SNAPSHOT.jar"
+    }
+
+
+
+         run javajobtest

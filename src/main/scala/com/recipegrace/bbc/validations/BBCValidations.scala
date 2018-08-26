@@ -9,6 +9,7 @@ import com.recipegrace.bbc.grmr.BBCStructures._
 trait BBCValidations extends ClusterValidation with SparkJobValidation
   with PySparkJobValidation
   with SBTJobValidation
+  with JavaJobValidation
   with ProgramConfigValidation with RepositoryValidation with PyJobValidation {
 
 
@@ -19,6 +20,7 @@ trait BBCValidations extends ClusterValidation with SparkJobValidation
     validateDistinctName(bBC.pySparkJobs, (x: PySparkJob) => x.name, "PySparkJob")
     validateDistinctName(bBC.pyJobs, (x: PyJob) => x.name, "PyJob")
     validateDistinctName(bBC.sbtJobs, (x: SBTJob) => x.name, "SBTJob")
+    validateDistinctName(bBC.javaJobs, (x: JavaJob) => x.name, "JavaJob")
 
     validateDistinctName(bBC.repositories, (x: Repository) => x.getName, "Nexus/Artifactory")
 
@@ -27,6 +29,7 @@ trait BBCValidations extends ClusterValidation with SparkJobValidation
     bBC.pySparkJobs.foreach(validatePySparkJob)
     bBC.pyJobs.foreach(validatePyJob)
     bBC.sbtJobs.foreach(validateSBTJob)
+    bBC.javaJobs.foreach(validateJavaJob)
 
     bBC.repositories.foreach(f => validateRepository(f, bBC.programConfiguration))
 
@@ -56,6 +59,11 @@ trait BBCValidations extends ClusterValidation with SparkJobValidation
     job.foreach(sbtJob => assert(x.variables.size==sbtJob.variables.size, s"definition of sbtjob:${sbtJob.name} and usage have different parameters"))
     job.foreach(sbtJob => assert(x.variables.size==sbtJob.variables.distinct.size, s"definition variable in ${sbtJob.name} is repeated"))
   }
+  def validateJavaJobVariables(x: RunJobAction, job :Option[JavaJob]) = {
+    job.foreach(javaJob => assert(x.variables.size==javaJob.variables.size, s"definition of javajob:${javaJob.name} and usage have different parameters"))
+    job.foreach(javaJob => assert(x.variables.size==javaJob.variables.distinct.size, s"definition variable in ${javaJob.name} is repeated"))
+  }
+
 
   def validateActions(bbc: BBC, actions: List[ActionTypeWithId]) = {
     def validateEachAction(x:ActionTypeWithId):Unit= {
@@ -81,6 +89,10 @@ trait BBCValidations extends ClusterValidation with SparkJobValidation
             case y: SBTJob => {
               assert(x.cluster.isEmpty, s"Cluster ${x.cluster.get}  specified for a sbt job:" + x.job)
               validateSBTJobVariables(x, bbc.sbtJobs.find(f => f.name.equals(x.job)))
+            }
+            case y: JavaJob => {
+              assert(x.cluster.isEmpty, s"Cluster ${x.cluster.get}  specified for a sbt job:" + x.job)
+              validateJavaJobVariables(x, bbc.javaJobs.find(f => f.name.equals(x.job)))
             }
             case y:PipelineJob => {
               assert(x.cluster.isEmpty, s"Cluster ${x.cluster.get}  specified for a pipeline job:" + x.job)

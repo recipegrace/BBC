@@ -1,12 +1,11 @@
 package com.recipegrace.bbc.workflow
 
-import java.io.Reader
+import java.io.{FileWriter, Reader}
 
 import com.recipegrace.bbc.codegen.ExpressionCreator
 import com.recipegrace.bbc.grmr.{BBCGrammar, BBCStructures}
 import com.recipegrace.bbc.grmr.BBCStructures.{ClusterStore, VariableDeclarations}
-import com.recipegrace.bbc.{ActivitiMain, ConcourseMain}
-import com.recipegrace.bbc.BaseTest
+import com.recipegrace.bbc.{ActivitiMain, BaseTest, ComposerMain, ConcourseMain}
 import org.activiti.engine.ProcessEngineConfiguration
 
 import scala.xml.NodeSeq
@@ -66,6 +65,12 @@ trait BaseWorkflowTest extends BaseTest with BBCGrammar with ExpressionCreator {
 
     ConcourseMain.generateProcess(dsl)
   }
+  def createComposerWorkFlow(dsl: String) = {
+
+    val writer = new FileWriter(".tests/output.txt")
+    writer.append(ComposerMain.generateProcess(dsl).get)
+    writer.close()
+  }
 
   def isValidActivitiWorkflow(dsl: String) = {
     val bbc = parseAll(_bbc, dsl).get
@@ -110,9 +115,9 @@ def generateYAMLObject(dsl:Reader) = {
 
   }
 
-  def assertionErrorOnDeclaration(x: String, message: String) = {
+  def assertionErrorOnDeclaration(x: String, message: String, composerOnly:Boolean=false) = {
 
-    assertionError(nameZoneStage + x + anAction, message)
+    assertionError(nameZoneStage + x + anAction, message,composerOnly)
   }
 
   def getFlowblocks(x: String) = {
@@ -142,29 +147,34 @@ def generateYAMLObject(dsl:Reader) = {
       }
     })
   }
-  def assertionError(x: String, message: String) = {
+  def assertionError(x: String, message: String, composerOnly:Boolean=false) = {
     BBCStructures.variableStore=Map()
     val content = parseAll(_bbc, x)
     val bbc = content.get
 
 
-    val yaml = intercept[AssertionError](GenerateFlows(bbc).generateConcourse)
-    yaml.getMessage shouldBe "assertion failed: " + message
-    val xml = intercept[AssertionError](GenerateFlows(bbc).generateActiviti)
+    if(!composerOnly) {
+      val yaml = intercept[AssertionError](GenerateFlows(bbc).generateConcourse)
+      yaml.getMessage shouldBe "assertion failed: " + message
+    }
+
+
+    val xml = intercept[AssertionError](GenerateFlows(bbc).generateComposer)
     xml.getMessage shouldBe "assertion failed: " + message
   }
-  def assertionErrorOnDeclarationYAML(x: String, message: String) = {
+  def assertionErrorOnDeclarationYAMLORTemplate(x: String, message: String,concourse:Boolean=true) = {
 
-    assertionErrorYAML(nameZoneStage + x + anAction, message)
+    assertionErrorYAML(nameZoneStage + x + anAction, message,concourse)
   }
 
-  def assertionErrorYAML(x: String, message: String) = {
+  def assertionErrorYAML(x: String, message: String, concourse:Boolean) = {
     BBCStructures.variableStore=Map()
     val content = parseAll(_bbc, x)
     val bbc = content.get
-    val yaml = intercept[AssertionError](GenerateFlows(bbc).generateConcourse)
 
-    yaml.getMessage shouldBe "assertion failed: " + message
+    val result  = intercept[AssertionError](if(concourse)GenerateFlows(bbc).generateConcourse else GenerateFlows(bbc).generateComposer)
+
+    result.getMessage shouldBe "assertion failed: " + message
   }
   def assertionError(x: String, parser:Parser[_], message: String) = {
     //val xml = intercept[AssertionError]

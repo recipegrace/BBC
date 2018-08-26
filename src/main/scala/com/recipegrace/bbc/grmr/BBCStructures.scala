@@ -22,13 +22,16 @@ object BBCStructures {
   sealed trait Declaration
 
 
-  sealed trait SparkJobConfig
+
+  sealed trait JavaJobConfig
+  sealed trait BaseSparkJobConfig
+  sealed trait SparkJobConfig extends BaseSparkJobConfig
   sealed trait RepositoryJobConfig
+
   sealed trait PyJobConfig extends RepositoryJobConfig
   sealed trait SBTJobConfig extends RepositoryJobConfig
   sealed trait WebserviceJobConfig
-  sealed trait PySparkJobConfig
-
+  sealed trait PySparkJobConfig extends BaseSparkJobConfig
   sealed trait Location
 
   abstract class Repository(name:String){
@@ -45,6 +48,13 @@ object BBCStructures {
     def id = key
   }
 
+  case class ArgumentJavaJobConfig(args:Array[Expression]) extends JavaJobConfig
+  case class MainClassJavaJobConfig(mainClass:Expression) extends JavaJobConfig
+  case class JarLocationJavaJobConfig(jarLocation:Expression) extends JavaJobConfig
+  case class PropertiesJavaJobConfig(properties:Expression) extends JavaJobConfig
+
+
+  case class ArgumentSparkJobConfig(args:Array[Expression]) extends BaseSparkJobConfig
   case class ProgramConfigZone(zone: Expression) extends ProgramConfig
 
   case class ProgramConfigName(name: String) extends ProgramConfig
@@ -55,15 +65,45 @@ object BBCStructures {
 
   case class ClusterConfigWorkers(workers: Expression) extends ClusterConfig
   case class ClusterConfigImage(image: Expression) extends ClusterConfig
+  case class ClusterConfigSubNetwork(subNetwork: Expression) extends ClusterConfig
+  case class ClusterConfigTags(tags: Array[Expression]) extends ClusterConfig
   case class ClusterConfigProperties(props: List[Expression]) extends ClusterConfig
   case class ClusterConfigInitialScript(script: Expression) extends ClusterConfig
   case class ClusterConfigVersion(version: Expression) extends ClusterConfig
   case class ClusterConfigInitialScriptTimeOut(timeOut: Expression) extends ClusterConfig
 
+
+  case class ClusterWrapper(workers:Expression,image:Expression,initialScript:Option[Expression],initialActionTimeout:Option[Expression], subNetWork:Option[Expression], tags:Option[Array[Expression]])
   case class Cluster(id: Int, variableName: String, clusterConfigs: List[ClusterConfig]) extends Declaration {
     val name = "BB-"+variableName + rand
+    lazy val cluster = calculateWrapper()
+
+
+    val tagMap:Map[String, Array[Expression]] = clusterConfigs
+      .map {
+
+        case x:ClusterConfigTags => TAGS ->x.tags
+        case _ => (System.currentTimeMillis()+"") -> Array(StringExpression(System.currentTimeMillis()+"" ).asInstanceOf[Expression])
+
+      }.toMap
+
+    lazy val configMap = clusterConfigs
+      .map {
+        case x: ClusterConfigWorkers => NUMWORKERS -> x.workers
+        case x: ClusterConfigImage => IMAGE -> x.image
+        case x: ClusterConfigInitialScript =>INITIALSCRIPT -> x.script
+        case x: ClusterConfigSubNetwork =>SUBNETWORK -> x.subNetwork
+        case x: ClusterConfigInitialScriptTimeOut =>INITIALSCRIPTTIMEOUT -> x.timeOut
+        case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
+
+      }.toMap
+    def calculateWrapper() = {
+
+      new ClusterWrapper(configMap(NUMWORKERS), configMap(IMAGE), configMap.get(INITIALSCRIPT),configMap.get(INITIALSCRIPTTIMEOUT), configMap.get(SUBNETWORK), tagMap.get(TAGS))
+    }
 
   }
+
 
   case class SparkJobConfigClassName(className: Expression) extends SparkJobConfig
 
@@ -73,7 +113,7 @@ object BBCStructures {
 
   case class RepositoryJarURI(org: Expression, artifactId: Expression, version: Expression, nexusKey: String) extends SparkJobConfig
 
-  case class SparkJobConfigArgs(args: Array[Expression]) extends SparkJobConfig
+
 
   case class PySparkJobConfigMainPyFile(mainPyFile: Expression) extends PySparkJobConfig
 
@@ -81,7 +121,7 @@ object BBCStructures {
 
   case class PySparkJobConfigOtherPyFiles(otherPyFiles: Array[Expression]) extends PySparkJobConfig
 
-  case class PySparkJobConfigArgs(args: Array[Expression]) extends PySparkJobConfig
+
 
 
   case class PyJobConfigMainPyFile(mainPyFile: Expression) extends PyJobConfig
@@ -100,13 +140,72 @@ object BBCStructures {
 
   case class GitRepository(repository:String, branch:String,name:String)
 
-  abstract class ClusterJob(name:String,variables:List[String]) extends Declaration {
+  abstract class ClusterJob(name:String,variables:List[String],configs:List[BaseSparkJobConfig]) extends Declaration {
     def getName:String = name
     def getVariables:List[String]=variables
 
+
+    val configMap:Map[String, Array[Expression]] = configs
+      .map {
+
+        case x:ArgumentSparkJobConfig => ARGS ->x.args
+        case _ => (System.currentTimeMillis()+"") -> Array(StringExpression(System.currentTimeMillis()+"" ).asInstanceOf[Expression])
+
+      }.toMap
   }
-  case class SparkJob(name: String, sparkJobConfigs: List[SparkJobConfig], variables:List[String]) extends ClusterJob(name,variables)
-  case class PySparkJob(name: String, pySparkJobConfigs: List[PySparkJobConfig], variables:List[String]) extends ClusterJob(name,variables)
+  case class SparkJobWrapper(mainClass:Expression, props:Expression, jarLocation:Option[Expression],args:Option[Array[Expression]],repository:Option[Array[Expression]])
+  case class PySparkJobWrapper(mainPyFile:Expression, props:Expression, otherPyFiles: Array[Expression], args:Option[Array[Expression]])
+  case class SparkJob(name: String, sparkJobConfigs: List[BaseSparkJobConfig], variables:List[String]) extends ClusterJob(name,variables,sparkJobConfigs) {
+
+    val id = System.currentTimeMillis()
+    lazy val sparkJob = calculateWrapper()
+    private val repository:Map[String, Array[Expression]] = sparkJobConfigs
+      .map {
+
+        case  RepositoryJarURI(_,x,y,_) => REPOSITORY -> Array(x,y)
+        case _ => (System.currentTimeMillis()+"") -> Array(StringExpression(System.currentTimeMillis()+"" ).asInstanceOf[Expression])
+
+      }.toMap
+
+    def calculateWrapper() = {
+
+      val spJobConfigs = sparkJobConfigs
+        .map {
+          case x: SparkJobConfigClassName => MAINCLASS -> x.className
+          case x:SparkJobConfigProps => PROPS ->x.props
+          case x:SparkJobConfigJarURI => JARLOCATION -> x.uri
+          case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
+
+        }.toMap
+
+      SparkJobWrapper(spJobConfigs(MAINCLASS), if(spJobConfigs.contains(PROPS))spJobConfigs(PROPS)else StringExpression(""), spJobConfigs.get(JARLOCATION), configMap.get(ARGS),repository.get(REPOSITORY))
+    }
+  }
+
+  case class PySparkJob(name: String, pySparkJobConfigs: List[BaseSparkJobConfig], variables:List[String]) extends ClusterJob(name,variables,pySparkJobConfigs) {
+    lazy val sparkJob = calculateWrapper()
+    val id = System.currentTimeMillis()
+
+    val moreFileMap:Map[String, Array[Expression]] = pySparkJobConfigs
+      .map {
+
+        case x:PySparkJobConfigOtherPyFiles => OTHERPYFILES ->x.otherPyFiles
+        case _ => (System.currentTimeMillis()+"") -> Array(StringExpression(System.currentTimeMillis()+"" ).asInstanceOf[Expression])
+
+      }.toMap
+    def calculateWrapper() = {
+
+      val spJobConfigs = pySparkJobConfigs
+        .map {
+          case x: PySparkJobConfigMainPyFile => MAINPYFILE -> x.mainPyFile
+          case x:PySparkJobConfigProps => PROPS ->x.props
+          case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
+
+        }.toMap
+
+      PySparkJobWrapper(spJobConfigs(MAINPYFILE), if(spJobConfigs.contains(PROPS))spJobConfigs(PROPS)else StringExpression(""), moreFileMap(OTHERPYFILES), configMap.get(ARGS))
+    }
+  }
 
   class RepositoryJobWrapper(repository: Expression,container:Expression, branch:Expression,name:String) {
     def getRepository = repository
@@ -115,18 +214,57 @@ object BBCStructures {
     def getContainer =container
   }
   case class PyJobWrapper (mainPyFile:Expression,  repository:Expression, container:Expression,
-                            branch:Expression, name:String) extends RepositoryJobWrapper(repository,container,branch,name)
+                            branch:Expression, name:String,args:Option[Array[Expression]]) extends RepositoryJobWrapper(repository,container,branch,name)
   case class SBTJobWrapper(mainClass:Expression,  repository:Expression, branch:Expression,
-                            container:Expression,name:String) extends RepositoryJobWrapper(repository,container,branch,name)
+                            container:Expression,name:String,args:Option[Array[Expression]]) extends RepositoryJobWrapper(repository,container,branch,name)
 
+
+  case class JavaJobWrapper(mainClass:Expression,jarLocation:Expression,args:Option[Array[Expression]], properties:Option[Expression] )
   case class WebservicePostJobWrapper(url:Expression, json:JSONType)
   case class WebserviceGetJobWrapper(url:Expression)
+
+  case class JavaJob(name:String,javaJobConfigs:List[JavaJobConfig],variables:List[String]) extends Declaration {
+    def getName:String = name
+    def getVariables:List[String]=variables
+    lazy val javaJob = calculateWrapper()
+
+    lazy val arrayMap = javaJobConfigs
+      .map {
+        case x: ArgumentJavaJobConfig => ARGS -> x.args
+        case _ => (System.currentTimeMillis()+"") -> Array(StringExpression(System.currentTimeMillis()+"" ).asInstanceOf[Expression])
+
+      }.toMap
+
+
+    lazy val configMap = javaJobConfigs
+      .map {
+        case x: PropertiesJavaJobConfig => PROPERTIES -> x.properties
+        case x: JarLocationJavaJobConfig => JARLOCATION -> x.jarLocation
+        case x: MainClassJavaJobConfig => MAINCLASS -> x.mainClass
+        case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
+
+      }.toMap
+    def calculateWrapper() = {
+
+      new JavaJobWrapper(configMap(MAINCLASS),configMap(JARLOCATION), arrayMap.get(ARGS),configMap.get(PROPERTIES))
+    }
+  }
+
 
 
   abstract class RepositoryJob(name:String,variables:List[String],repositoryJobConfigs:List[RepositoryJobConfig]) extends Declaration {
     def getName:String = name
     def getVariables:List[String]=variables
     lazy val repositoryJob = calculateWrapper()
+
+    lazy val arrayMap = repositoryJobConfigs
+      .map {
+        case x: RepositoryJobConfigArgs => ARGS -> x.args
+        case _ => (System.currentTimeMillis()+"") -> Array(StringExpression(System.currentTimeMillis()+"" ).asInstanceOf[Expression])
+
+      }.toMap
+
+
     lazy val configMap = repositoryJobConfigs
       .map {
         case x: RepositoryJobConfigRepository => REPOSITORY -> x.repository
@@ -153,13 +291,14 @@ object BBCStructures {
         case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
 
       }.toMap ++configMap
-      PyJobWrapper(pyConfigs(MAINPYFILE), pyConfigs(REPOSITORY), pyConfigs(CONTAINER), pyConfigs(REPOBRANCH),name)
+      PyJobWrapper(pyConfigs(MAINPYFILE), pyConfigs(REPOSITORY), pyConfigs(CONTAINER), pyConfigs(REPOBRANCH),name,arrayMap.get(ARGS))
     }
   }
 
 
   case class SBTJob(name: String, sbtJobConfigs: List[RepositoryJobConfig], variables:List[String]) extends RepositoryJob(name,variables,sbtJobConfigs) {
     lazy val sbtJob = calculateWrapper()
+
 
     override def calculateWrapper() = {
       val sbtConfigs = sbtJobConfigs
@@ -168,9 +307,11 @@ object BBCStructures {
           case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
 
         }.toMap ++ configMap
-      SBTJobWrapper(sbtConfigs(MAINCLASS), sbtConfigs(REPOSITORY), sbtConfigs(REPOBRANCH),sbtConfigs(CONTAINER),name)
+      SBTJobWrapper(sbtConfigs(MAINCLASS), sbtConfigs(REPOSITORY), sbtConfigs(REPOBRANCH),sbtConfigs(CONTAINER),name,arrayMap.get(ARGS))
     }
   }
+
+
 
   case class WebservicePostJob(name: String, webserviceJobConfigs: List[WebserviceJobConfig], variables:List[String]) extends Declaration {
     lazy val sbtJob = calculateWrapper()

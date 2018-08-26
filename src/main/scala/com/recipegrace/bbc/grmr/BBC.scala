@@ -41,7 +41,7 @@ class BBC(val programConfigs: List[ProgramConfig],
   val pySparkJobs: List[PySparkJob] = getDeclarations[PySparkJob]
   val pyJobs: List[PyJob] = getDeclarations[PyJob]
   val sbtJobs: List[SBTJob] = getDeclarations[SBTJob]
-
+  val javaJobs: List[JavaJob] = getDeclarations[JavaJob]
   val clusters: List[Cluster] = getDeclarations[Cluster]
   val repositories: List[Repository] =getDeclarations[NexusRepository]++ getDeclarations[ArtifactoryRepository]
   lazy val storeVariables :List[VariableDeclaration] = allDeclarations.flatMap{ f=> f._2 match {

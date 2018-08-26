@@ -28,3 +28,4 @@ results/
 .project
 
 local.*
+.tests/

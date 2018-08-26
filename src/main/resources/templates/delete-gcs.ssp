@@ -1,0 +1,12 @@
+<%@ var location:com.recipegrace.bbc.grmr.Expressions.Expression %>
+<%@ var localVariables:Map[String, com.recipegrace.bbc.grmr.Expressions.Expression] %>
+<%@ var evalObject: com.recipegrace.bbc.codegen.ExpressionCreator%>
+<%@ var name: String%>
+  bucket_name, object_name = '${evalObject.evaluateVariable(location,localVariables)}'[5:].split('/', 1)
+  ${name} = airflow.contrib.operators.GoogleCloudStorageListOperator(
+    task_id='${name}',
+    # Give the cluster a unique name by appending the date scheduled.
+    # See https://airflow.apache.org/code.html#default-variables
+    bucket=bucket_name,
+    prefix=object_name
+  )
