@@ -31,9 +31,9 @@ trait SubmitPySparkJobServiceTask extends ExpressionCreator {
 
 
 
-  def fromPySparkJobConfigs(sparkJobConfigs: List[PySparkJobConfig], cloudWorkspace: Option[Expression], localVariables:Map[String,Expression]): Map[String, Expression] = {
+  def fromPySparkJobConfigs(sparkJobConfigs: List[BaseSparkJobConfig], cloudWorkspace: Option[Expression], localVariables:Map[String,Expression]): Map[String, Expression] = {
     sparkJobConfigs.map {
-      case PySparkJobConfigArgs(x:Array[Expression]) => "-programArguments" -> x.map(f=> evaluateVariable (f, localVariables)).mkString(BIGBRICKSDELEMITER)
+      case ArgumentSparkJobConfig(x:Array[Expression]) => "-programArguments" -> x.map(f=> evaluateVariable (f, localVariables)).mkString(BIGBRICKSDELEMITER)
       case PySparkJobConfigMainPyFile(x:Expression) => "-mainPyFile" -> evaluateVariable(x,localVariables).toString
       case PySparkJobConfigOtherPyFiles(x: Array[Expression]) => "-otherPyFiles" ->  x.map(f=> evaluateVariable (f, localVariables)).mkString(",")
       case PySparkJobConfigProps(StringExpression(x)) => "-properties" -> x

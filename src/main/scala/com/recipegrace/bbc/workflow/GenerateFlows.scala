@@ -7,6 +7,7 @@ import com.recipegrace.bbc.grmr.Expressions.Expression
 import com.recipegrace.bbc.grmr._
 import java.util.logging.Logger
 
+import com.recipegrace.bbc.composer.ComposerFlowBlockCombiner
 import com.recipegrace.bbc.concourse.ConcourseFlowBlockCombiner
 import com.recipegrace.bbc.validations.BBCValidations
 /**
@@ -38,7 +39,9 @@ class GenerateFlows(bBC: BBC) extends ClusterStoreIO with  GrammarKeywords with 
   def generateConcourse = {
     ConcourseFlowBlockCombiner.mergeYAML(repositoryFlowBlocks(bBC.actions)++ toFlowBlock(bBC.actions,Map()),findResources, bBC.programConfiguration.name)
   }
-
+  def generateComposer = {
+    ComposerFlowBlockCombiner.mergeWorkflow(repositoryFlowBlocks(bBC.actions)++ toFlowBlock(bBC.actions,Map()),findResources, bBC.programConfiguration)
+  }
 
 
   def findResources = {
@@ -57,7 +60,7 @@ class GenerateFlows(bBC: BBC) extends ClusterStoreIO with  GrammarKeywords with 
   private def repositoryFlowBlocks(actions: List[ActionTypeWithId]): List[FlowBlock] = {
 
 
-    def allSparkJobConfigs(actions:List[ActionTypeWithId]):List[SparkJobConfig] = actions.flatMap{
+    def allSparkJobConfigs(actions:List[ActionTypeWithId]):List[BaseSparkJobConfig] = actions.flatMap{
       case x:RunJobAction => List(x.job)
       case _ => List()
     }.map(f=> bBC.allDeclarationsMap(f)).flatMap{
@@ -90,6 +93,7 @@ class GenerateFlows(bBC: BBC) extends ClusterStoreIO with  GrammarKeywords with 
       }
       case f:PyJob =>  new RunPythonFlowBlock(f,f.variables.zip(x.variables.map(f=>expr(evaluateVariable(f,currentLocalVariables)+""))).toMap,bBC.programConfiguration,clusterStore) :: toFlowBlock(actions,currentLocalVariables)
       case f:SBTJob =>  new RunSBTFlowBlock(f,f.variables.zip(x.variables.map(f=>expr(evaluateVariable(f,currentLocalVariables)+""))).toMap,bBC.programConfiguration,clusterStore) :: toFlowBlock(actions,currentLocalVariables)
+      case f:JavaJob =>  new RunJavaFlowBlock(f,f.variables.zip(x.variables.map(f=>expr(evaluateVariable(f,currentLocalVariables)+""))).toMap,bBC.programConfiguration,clusterStore) :: toFlowBlock(actions,currentLocalVariables)
       case f:PipelineJob => {
         nextActionsInPipeLine = actions.flatMap{
           case x:RunJobAction => bBC.allDeclarationsMap(x.job) match {
@@ -114,7 +118,7 @@ class GenerateFlows(bBC: BBC) extends ClusterStoreIO with  GrammarKeywords with 
       case Nil => List()
       case x :: y => x match {
         case x:RunJobAction => processJobAction(x,y,currentLocalVariables)
-        case x: DeleteGCSFolderAction => new DeleteGCSActionFlowBlock(bBC.programConfiguration, x.folder) :: toFlowBlock(y,currentLocalVariables)
+        case x: DeleteGCSFolderAction => new DeleteGCSActionFlowBlock(bBC.programConfiguration, x.folder,currentLocalVariables) :: toFlowBlock(y,currentLocalVariables)
       }
     }
   }

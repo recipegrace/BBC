@@ -25,7 +25,7 @@ class SubmitSparkJobServiceTaskTest extends BaseCodeGenTest with SubmitSparkJobS
 
   def submitSparkJob(baseTask: BaseTask) = {
     val sparkJob = SparkJob(sparkJobName, List(
-      SparkJobConfigArgs(programArgs),
+      ArgumentSparkJobConfig(programArgs),
       SparkJobConfigProps(expr(sparkProps)),
       SparkJobConfigClassName(expr(MAINCLASS)),
       SparkJobConfigJarURI(expr(jarURIs))

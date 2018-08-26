@@ -1,0 +1,18 @@
+<%@ var programConfiguration:com.recipegrace.bbc.workflow.ProgramConfiguration %>
+<%@ var clusterName:String %>
+<%@ var sparkJob:com.recipegrace.bbc.grmr.BBCStructures.PySparkJob %>
+<%@ var localVariables:Map[String, com.recipegrace.bbc.grmr.Expressions.Expression] %>
+<%@ var evalObject: com.recipegrace.bbc.codegen.ExpressionCreator%>
+<%@ val sparkProperties:String= evalObject.evaluateVariable(sparkJob.sparkJob.props,localVariables).toString%>
+<%@ val hasArguments:Boolean = sparkJob.sparkJob.args.nonEmpty%>
+<%@ var name: String%>
+
+  ${name} = dataproc_operator.DataProcPySparkOperator(
+    task_id='submit_spark_${name}',
+    main='${evalObject.evaluateVariable(sparkJob.sparkJob.mainPyFile,localVariables)}',
+    job_name='submit_spark_${sparkJob.name}',
+    pyfiles=[${ sparkJob.sparkJob.otherPyFiles.map(f=> "'"+evalObject.evaluateVariable(f,localVariables )+"'").mkString(",")}],
+    #if(hasArguments)arguments=[${sparkJob.sparkJob.args.get.map(f=> "'"+evalObject.evaluateVariable(f,localVariables )+"'").mkString(",")}],
+    #end#if(sparkProperties.nonEmpty)dataproc_spark_properties='${sparkProperties}',
+    #endcluster_name='${clusterName}'.lower()
+  )

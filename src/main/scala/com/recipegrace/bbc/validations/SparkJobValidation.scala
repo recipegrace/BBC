@@ -13,7 +13,7 @@ trait SparkJobValidation extends BaseValidations with GrammarKeywords {
     validateSparkJobConfigs(sparkJob.sparkJobConfigs, sparkJob.name)
   }
 
-  def validateSparkJobConfigs(sparkJobConfigs: List[SparkJobConfig], name: String) = {
+  def validateSparkJobConfigs(sparkJobConfigs: List[BaseSparkJobConfig], name: String) = {
     mandatory(List(MAINCLASS, JARLOCATION), sparkJobConfigs, s"SparkJob $name")
     configValidation(sparkJobConfigs, s"on SparkJob $name")
     sparkJobConfigs.foreach {

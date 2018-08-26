@@ -13,7 +13,7 @@ abstract class BaseRepositoryJobTest  extends BaseWorkflowTest {
 
   test("variable usage on sbt") {
 
-    assertionErrorOnDeclarationYAML(
+    assertionErrorOnDeclarationYAMLORTemplate(
       s"""$jobName example {
            $validLine
          repository= temp
@@ -23,7 +23,7 @@ abstract class BaseRepositoryJobTest  extends BaseWorkflowTest {
       run example
       """.stripMargin, "variable temp not defined")
 
-    assertionErrorOnDeclarationYAML(
+    assertionErrorOnDeclarationYAMLORTemplate(
       s"""
          $jobName example(test) {
          $validLine

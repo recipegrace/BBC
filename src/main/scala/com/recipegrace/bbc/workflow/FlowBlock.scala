@@ -9,6 +9,7 @@ import scala.xml.NodeSeq
   * Created by Ferosh Jacob on 11/24/16.
   */
 case class ProgramConfiguration(env: Expression, zone: Expression, name: String, cloudWorkspace: Option[Expression])
+case class KeyAndContent(key:String, content:String,createTask:Boolean)
 
 abstract class FlowBlock(programConfig: ProgramConfiguration) {
 
@@ -16,7 +17,6 @@ abstract class FlowBlock(programConfig: ProgramConfiguration) {
   var toXML: NodeSeq
 
   var displayName:String
-
   val flowBlockId:Int
   var toYAML:List[Map[String,Any]]
   var _startID = ""
@@ -41,4 +41,6 @@ abstract class FlowBlock(programConfig: ProgramConfiguration) {
   override def toString = {
     s" ${this.getClass.getSimpleName}: [${_startID} -> ${_endID}]"
   }
+
+  def template:List[KeyAndContent] = List()
 }

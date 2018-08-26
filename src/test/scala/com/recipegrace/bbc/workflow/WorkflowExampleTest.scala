@@ -23,6 +23,7 @@ class WorkflowExampleTest extends BaseWorkflowTest {
       """.stripMargin
     val xml = createActivitWorkFlow(dsl)
     val yaml = createConcourseWorkFlow(dsl)
+   
     yaml.get.nonEmpty shouldBe true
   }
 
@@ -39,6 +40,21 @@ class WorkflowExampleTest extends BaseWorkflowTest {
     val xml = createActivitWorkFlow(dsl)
     val yaml = createConcourseWorkFlow(dsl)
     yaml.get.nonEmpty shouldBe true
+  }
+
+  test("json add test") {
+    val dsl =
+      """name="exampleProject"
+         env="rc-www-search"
+         zone="us-east1-c"
+        var a = {"a": "c"}
+        var b = {"b":"d"}
+
+         delete a+b
+      """.stripMargin
+
+    isValidActivitiWorkflow(dsl)
+    isValidConcourseWorkflow(dsl)
   }
 
   test("create workflow with two actions test") {

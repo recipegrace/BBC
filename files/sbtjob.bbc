@@ -1,0 +1,17 @@
+        name="1"
+        zone="east"
+        env="stage"
+
+        var c = "three"
+        sbtjob example (a, b,c) {
+                 mainClass="com.hello.HelloWorld"
+                 repository= "git@github.recipegrace.com:OLT-search/Alexis.git"
+                 repoBranch="master"
+                 container="recipegrace/bigbricks-docker"
+                 args = "--this", "will", "--may", "work", a, b, c
+                 }
+
+
+
+
+        run example("one", "two","four")

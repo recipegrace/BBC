@@ -11,7 +11,7 @@ class PipelineJobValidationsTest extends BaseWorkflowTest {
   test("variable usage on pipeline job") {
 
 
-    assertionErrorOnDeclarationYAML(
+    assertionErrorOnDeclarationYAMLORTemplate(
       """var letuscheck="23"
          pythonjob example {
          mainPyFile="hola"
@@ -26,7 +26,7 @@ class PipelineJobValidationsTest extends BaseWorkflowTest {
       """.stripMargin, "Declaration has repeated declarations with the same name: letuscheck")
 
 
-    assertionErrorOnDeclarationYAML(
+    assertionErrorOnDeclarationYAMLORTemplate(
       """var letuscheck="23"
        pysparkjob example(test) {
          mainPyFile="sd"
@@ -39,7 +39,7 @@ class PipelineJobValidationsTest extends BaseWorkflowTest {
       """.stripMargin, "Declaration has repeated declarations with the same name: letuscheck")
 
 
-    assertionErrorOnDeclarationYAML(
+    assertionErrorOnDeclarationYAMLORTemplate(
       """
        pysparkjob example(test) {
          mainPyFile=test

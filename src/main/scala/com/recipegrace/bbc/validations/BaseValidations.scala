@@ -91,8 +91,15 @@ trait BaseValidations {
       case "RepositoryJobConfigRepoBranch" =>"repoBranch"
       case "RepositoryJobConfigContainer" =>"container"
       case "SBTJobConfigMainClass" =>"mainClass"
+      case "ArgumentSparkJobConfig"   => "args"
+      case "ArgumentJavaJobConfig"   => "args"
+      case "MainClassJavaJobConfig"   => "mainClass"
+      case "JarLocationJavaJobConfig"   => "jarLocation"
+      case "PropertiesJavaJobConfig"   => "properties"
+
       case x:String if x.endsWith("ConfigArgs") => "args"
       case _ => fullName
+
     }
 
   }

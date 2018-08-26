@@ -14,7 +14,7 @@ trait PySparkJobValidation extends BaseValidations with GrammarKeywords {
     validatePySparkJobConfigs(pySparkJob.pySparkJobConfigs, pySparkJob.name)
   }
 
-  def validatePySparkJobConfigs(pySparkJobConfigs: List[PySparkJobConfig], name: String) = {
+  def validatePySparkJobConfigs(pySparkJobConfigs: List[BaseSparkJobConfig], name: String) = {
     mandatory(List(MAINPYFILE), pySparkJobConfigs, s"PySparkJob $name")
     configValidation(pySparkJobConfigs, s"on PySparkJob $name")
     pySparkJobConfigs.foreach {

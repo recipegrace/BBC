@@ -1,6 +1,6 @@
 package com.recipegrace.bbc
 
-import java.io.FileReader
+import java.io.{FileReader, FileWriter}
 
 import com.recipegrace.bbc.workflow.BaseWorkflowTest
 
@@ -19,73 +19,95 @@ class WorkflowsFromFilesTest extends BaseWorkflowTest {
   }
 
 
+  private def printOutConcourseAndComposePipeLines(fileName: String,compose:Boolean=true, concourse:Boolean=false) = {
 
+    val main =if(concourse) ConcourseMain else ComposerMain
+    val content = main.generateProcess(new FileReader("files/" + fileName))
 
-
-
-  private def printOutConcoursePipeLine(fileName: String) = {
-    val content = ConcourseMain.generateProcess(new FileReader("files/" + fileName))
-    ConcourseMain.errorMessage shouldBe ""
-    ConcourseMain.generateFlows.clusterStore.running shouldBe List()
-    println(content.get)
+    main.errorMessage shouldBe ""
+    main.generateFlows.clusterStore.running shouldBe List()
+    //println(content.get)
+    //val writer = new FileWriter(".tests/output.txt")
+    //writer.append(content.get)
+    //writer.close()
   }
 
   test("main file test (concourse)") {
 
     val fileName = "simplejob.bbc"
-    printOutConcoursePipeLine(fileName)
+    printOutConcourseAndComposePipeLines(fileName)
+
+  }
+
+  test("main file test (compose)") {
+
+    val fileName = "javajob.bbc"
+    printOutConcourseAndComposePipeLines(fileName,compose=true,concourse = false)
+
+  }
+  test("main file test (composer)") {
+
+    val fileName = "basicjob.bbc"
+    printOutConcourseAndComposePipeLines(fileName, true)
 
   }
 
   test("python and pyspark (concourse)") {
 
     val fileName = "sparkpythonjob.bbc"
-    printOutConcoursePipeLine(fileName)
+    printOutConcourseAndComposePipeLines(fileName)
 
   }
 
 
   test("java (concourse)") {
 
-    val fileName = "javajob.bbc"
-    printOutConcoursePipeLine(fileName)
+    val fileName = "sbtjob.bbc"
+    printOutConcourseAndComposePipeLines(fileName)
 
   }
 
-  test("main file test (concourse) pyspark") {
+  test("json (concourse)") {
+
+    val fileName = "jsonexample.bbc"
+    printOutConcourseAndComposePipeLines(fileName)
+
+  }
+
+  test("main file test (concourse/composer) pyspark") {
 
     val fileName1 = "pysparkjob.bbc"
-    printOutConcoursePipeLine(fileName1)
+    printOutConcourseAndComposePipeLines(fileName1)
 
   }
   test("main file test (concourse) pyspark 2") {
 
     val fileName2 = "sparkandpyspark.bbc"
-    printOutConcoursePipeLine(fileName2)
+    printOutConcourseAndComposePipeLines(fileName2)
 
   }
   test("main file test (concourse) spark, pyspark, python") {
 
     val fileName2 = "sparkpysparkandpython.bbc"
-    printOutConcoursePipeLine(fileName2)
+    printOutConcourseAndComposePipeLines(fileName2)
 
   }
   test("main file test (concourse) python") {
 
     val fileName1 = "pythonjob.bbc"
-    printOutConcoursePipeLine(fileName1)
+    printOutConcourseAndComposePipeLines(fileName1)
 
   }
   test("main file test (concourse) pipeline") {
 
     val fileName1 = "pipelinejob.bbc"
-    printOutConcoursePipeLine(fileName1)
+    printOutConcourseAndComposePipeLines(fileName1)
 
   }
   test("main file test (concourse) artifactory") {
 
     val fileName = "simpleartifactoryjob.bbc"
-    printOutConcoursePipeLine(fileName)
+    printOutConcourseAndComposePipeLines(fileName)
 
 
   }

@@ -9,7 +9,7 @@ import com.recipegrace.bbc.workflow.ProgramConfiguration
 /**
   * Created by Ferosh Jacob on 2/4/17.
   */
-trait BaseConcourseSBTTask  extends ExpressionCreator with ClusterServiceTask {
+trait BaseConcourseSBTTask  extends ExpressionCreator with ClusterServiceTask with ResourceNameGenerator {
 
 
   def createBaseSBTConcourseTask(id:Int, displayName:String, sbtJob: SBTJob, localVariables:Map[String,Expression], clusterStore: ClusterStore, config:ProgramConfiguration):List[Map[String,Any]] = {
@@ -27,7 +27,9 @@ trait BaseConcourseSBTTask  extends ExpressionCreator with ClusterServiceTask {
     val withMainClass = List(List("runMain",  (mainClass:: variablesEvaluated).mkString(" ")).mkString("\""," ", "\""))
     val container:Any =evaluateVariable ( sbtJob.sbtJob.container, localVariables)
 
-    val resourceName =  sbtJob.name+"-resource"
+    val gitRepo =evaluateVariable ( sbtJob.sbtJob.repository, localVariables)
+    val gitBranch = evaluateVariable(sbtJob.sbtJob.branch,localVariables)
+    val resourceName =  createResourceName(gitRepo.toString,gitBranch.toString)
     val params = Map("PROXYPORT"->"{{proxy-port}}", "PROXYURL"->"{{proxy-url}}","GCPTOKEN" -> "{{gcp-token}}", "GITHDTOKEN" ->"{{github-private-key}}" )
 
     val configs= Map("params" -> params,

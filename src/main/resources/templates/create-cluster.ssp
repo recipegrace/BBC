@@ -1,0 +1,21 @@
+<%@ var programConfiguration:com.recipegrace.bbc.workflow.ProgramConfiguration %>
+<%@ var cluster:com.recipegrace.bbc.grmr.BBCStructures.Cluster %>
+<%@ var localVariables:Map[String, com.recipegrace.bbc.grmr.Expressions.Expression] %>
+<%@ var evalObject: com.recipegrace.bbc.codegen.ExpressionCreator%>
+<%@ val hasTags:Boolean = cluster.cluster.tags.nonEmpty%>
+<%@ var name: String%>
+
+  ${name} = DataprocClusterCreateOperatorModified(
+    task_id='create_cluster_${name}',
+    # Give the cluster a unique name by appending the date scheduled.
+    # See https://airflow.apache.org/code.html#default-variables
+    cluster_name='${cluster.name}'.lower(),
+    num_workers=${ evalObject.evaluateVariable(cluster.cluster.workers,localVariables)},
+    zone='${evalObject.evaluateVariable(programConfiguration.zone,localVariables )}',
+    #if(cluster.cluster.subNetWork.nonEmpty)subnetwork_uri='${evalObject.evaluateVariable(cluster.cluster.subNetWork.get,localVariables)}',
+    #end#if(cluster.cluster.initialScript.nonEmpty)init_actions_uris=['${evalObject.evaluateVariable(cluster.cluster.initialScript.get,localVariables)}'],
+    #end#if(cluster.cluster.initialActionTimeout.nonEmpty)init_action_timeout='${evalObject.evaluateVariable(cluster.cluster.initialActionTimeout.get,localVariables)}',
+    #end#if(hasTags)tags=[${cluster.cluster.tags.get.map(f=> "'"+evalObject.evaluateVariable(f,localVariables )+"'").mkString(",")}],
+    #endmaster_machine_type='${evalObject.evaluateVariable(cluster.cluster.image,localVariables)}',
+    worker_machine_type='${evalObject.evaluateVariable(cluster.cluster.image,localVariables)}'
+  )

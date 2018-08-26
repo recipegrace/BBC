@@ -1,12 +1,15 @@
 package com.recipegrace.bbc.workflow
 
 import com.recipegrace.bbc.activiti.BaseActivitiServiceTask
-import com.recipegrace.bbc.codegen.{ClusterServiceTask, SubmitPySparkJobServiceTask, SubmitSparkJobServiceTask}
+import com.recipegrace.bbc.codegen.{ClusterServiceTask, ExpressionCreator, SubmitPySparkJobServiceTask, SubmitSparkJobServiceTask}
+import com.recipegrace.bbc.composer.Templates
 import com.recipegrace.bbc.concourse.BaseConcourseDelegateTask
 import com.recipegrace.bbc.grmr.BBCStructures._
 import com.recipegrace.bbc.grmr.Expressions.Expression
 import com.recipegrace.bbc.grmr.IDGenerator._
 import com.recipegrace.bbc.concourse.BaseConcourseDelegateTask
+import com.recipegrace.bbc.grmr.IDGenerator
+import com.recipegrace.bbc.workflow
 
 import scala.xml.NodeSeq
 
@@ -80,4 +83,28 @@ class RunSparkActionFlowBlock(clusterCreate: Boolean, clusterDelete: Boolean, cl
 
   }
   override val flowBlockId: Int = autoId
+  override def template:List[KeyAndContent] = {
+
+    object evalObject extends ExpressionCreator
+    val id = IDGenerator.autoId
+    val defaultArgs = Map ( "programConfiguration"->config, "localVariables" -> variables,"evalObject" -> evalObject)
+    val clusterCreateKey = displayName +"_C"+id
+    val clusterCreation = if(clusterCreate) Templates.translate("templates/create-cluster.ssp",Map("name" -> clusterCreateKey,
+      "cluster" -> cluster) ++defaultArgs) else s"# Reusing cluster ${cluster.name}"
+
+    val submitSparkJobKey = displayName+"_S"+id
+    val submitSparkJob = clusterJob match {
+      case sparkJob: SparkJob => KeyAndContent(submitSparkJobKey,Templates.translate("templates/run-spark.ssp",Map("name" -> submitSparkJobKey,
+        "clusterName" -> cluster.name, "sparkJob" -> sparkJob)++defaultArgs),true)
+      case sparkJob: PySparkJob =>KeyAndContent(submitSparkJobKey ,Templates.translate("templates/run-pyspark.ssp",Map("name" -> submitSparkJobKey,
+        "clusterName" -> cluster.name, "sparkJob" -> sparkJob)++defaultArgs),true)
+    }
+
+    val clusterDeleteKey = displayName+"_D"+id
+    val clusterDeletion = if(clusterDelete) Templates.translate("templates/delete-cluster.ssp",Map("name" -> clusterDeleteKey,
+      "clusterName" -> cluster.name)) else s"# Don't delete the  cluster ${cluster.name}, will be reused"
+
+    List( KeyAndContent(clusterCreateKey,clusterCreation,clusterCreate), submitSparkJob, KeyAndContent(clusterDeleteKey,clusterDeletion,clusterDelete))
+  }
+
 }
