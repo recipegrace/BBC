@@ -12,7 +12,7 @@ abstract class BaseTest extends FunSuite with Matchers {
 
 
   val logger = Logger.getLogger(this.getClass.getName)
-  logger.setLevel(Level.ERROR)
+  logger.setLevel(Level.SEVERE)
   def println(x:Any) = {
 
     logger.info(x+"")
