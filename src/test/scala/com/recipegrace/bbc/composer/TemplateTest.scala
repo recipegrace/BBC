@@ -237,7 +237,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
     output shouldBe "<p> Hello Hiram Chirino, from Tampa. </p>"
   }
   test("template header test") {
-    ComposerFlowBlockCombiner.generateHeaderContent(ProgramConfiguration(expr("env"),expr("zone"),"hola",None)) should have size 18121
+    ComposerFlowBlockCombiner.generateHeaderContent(ProgramConfiguration(expr("env"),expr("zone"),"hola",None)) should have size 18099
 
   }
 }
