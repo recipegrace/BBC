@@ -426,5 +426,5 @@ default_dag_args = {
 with models.DAG(
   '${programConfiguration.name}',
   #Continue to run DAG once per day
-  schedule_interval=datetime.timedelta(days=1),
+  schedule_interval=None,
   default_args=default_dag_args) as dag:
