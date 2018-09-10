@@ -8,7 +8,7 @@ zone="us-east1-c"
     javajob javajobtest {
         mainClass="com.recipegrace.biglibrary.gasexamples.SimpleGoogleCloudOps"
         args= "--input" ,"gs://hd-srch-dev-mosambi/terms.txt", "--output" ,"gs://hd-srch-dev-mosambi/work/test/awesome.txt"
-        jarLocation= "gs://hd-srch-dev-mosambi/GasExamples-0.0.7-SNAPSHOT.jar"
+        jarLocation= "gs://rc-srch-dev-mosambi/jars/Robo2-core-0.0.1-SNAPSHOT.jar"
     }
 
 

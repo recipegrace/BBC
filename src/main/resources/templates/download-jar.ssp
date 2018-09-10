@@ -6,11 +6,12 @@
 <%@ val location:String = evalObject.evaluateVariable(javaJob.javaJob.jarLocation,localVariables).toString%>
 <%@ val bucket:String = location.substring(5).split("/").head %>
 <%@ val objectName:String = location.substring(5).split("/").drop(1).mkString("/") %>
+<%@ val fileName:String = location.substring(5).split("/").last %>
 <%@ var name: String%>
 
   ${name} = gcs_download_operator.GoogleCloudStorageDownloadOperator(
    task_id='copy_jar_${name}',
    bucket='${bucket}',
    object='${objectName}',
-   filename='/tmp/${objectName}'
+   filename='/tmp/${fileName}'
   )

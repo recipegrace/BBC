@@ -6,7 +6,7 @@
 <%@ val location:String = evalObject.evaluateVariable(javaJob.javaJob.jarLocation,localVariables).toString%>
 <%@ val mainClass:String = evalObject.evaluateVariable(javaJob.javaJob.mainClass,localVariables).toString%>
 <%@ val bucket:String = location.substring(5).split("/").head %>
-<%@ val objectName:String = location.substring(5).split("/").drop(1).mkString("/") %>
+<%@ val objectName:String = location.substring(5).split("/").last %>
 <%@ var name: String%>
 
   ${name} = bash_operator.BashOperator(
