@@ -6,10 +6,12 @@
 <%@ val location:String = evalObject.evaluateVariable(javaJob.javaJob.jarLocation,localVariables).toString%>
 <%@ val mainClass:String = evalObject.evaluateVariable(javaJob.javaJob.mainClass,localVariables).toString%>
 <%@ val bucket:String = location.substring(5).split("/").head %>
-<%@ val objectName:String = location.substring(5).split("/").last %>
+<%@ val objectName:String = location.substring(5).split("/").drop(1).mkString("/") %>
 <%@ var name: String%>
+<%@ var command1:String = s"gsutil -m cp -r ${location} ."%>
+<%@ var command2:String = s"java -cp ${objectName} ${mainClass} ${ javaJob.javaJob.args.get.map(f=> evalObject.evaluateVariable(f,localVariables )).mkString(" ")}"%>
 
   ${name} = bash_operator.BashOperator(
    task_id='run_jar_${name}',
-   bash_command='java -cp /tmp/${objectName} ${mainClass} ${ javaJob.javaJob.args.get.map(f=> evalObject.evaluateVariable(f,localVariables )).mkString(" ")}'
+   bash_command='${command1};${command2}'
   )
