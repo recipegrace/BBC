@@ -35,14 +35,16 @@ class RunJavaFlowBlock(javaJob: JavaJob, variables:Map[String,Expression], confi
     object evalObject extends ExpressionCreator
     val id = IDGenerator.autoId
     val defaultArgs = Map ( "programConfiguration"->configuration, "localVariables" -> variables,"evalObject" -> evalObject)
-    val copyJarKey = displayName +"_C"+id
+   /* val copyJarKey = displayName +"_C"+id
     val copyJarContent = Templates.translate("templates/download-jar.ssp",Map("name" -> copyJarKey,
       "javaJob" -> javaJob) ++defaultArgs)
-
+*/
     val runJarKey = displayName+"_R"+id
     val runJarContent = Templates.translate("templates/run-jar.ssp",Map("name" -> runJarKey,
       "javaJob" -> javaJob) ++defaultArgs)
 
-    List( KeyAndContent(copyJarKey,copyJarContent,true), KeyAndContent (runJarKey,runJarContent,true))
+    List(
+      //KeyAndContent(copyJarKey,copyJarContent,true),
+      KeyAndContent (runJarKey,runJarContent,true))
   }
 }

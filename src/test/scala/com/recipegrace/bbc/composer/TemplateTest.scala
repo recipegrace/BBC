@@ -37,6 +37,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
 
     val job = parseAll(_javaJobBody, jobDefintiion).get
 
+    /*
     Templates.translate("templates/download-jar.ssp", Map("name" -> taskName, "localVariables" -> localVariables,
       "evalObject" -> evalObject,
       "programConfiguration" -> programConfiguration,
@@ -47,6 +48,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
          |   object='${objectName}',
          |   filename='/tmp/${objectName}'
   )""".stripMargin
+  */
 
     Templates.translate("templates/run-jar.ssp", Map("name" -> taskName, "localVariables" -> localVariables,
       "evalObject" -> evalObject,
@@ -54,7 +56,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
       "javaJob" -> job._2)) shouldBe "\n" +
       s"""  $taskName = bash_operator.BashOperator(
          |   task_id='run_jar_${taskName}',
-         |   bash_command='java -cp /tmp/${objectName} $mainClass ${programArguments.mkString(" ")}'
+         |   bash_command='gsutil -m cp -r gs://${bucketName}/${objectName} .;java -cp ${objectName} $mainClass ${programArguments.mkString(" ")}'
   )""".stripMargin
   }
   test("delete gcs") {
