@@ -4,6 +4,7 @@
 <%@ var localVariables:Map[String, com.recipegrace.bbc.grmr.Expressions.Expression] %>
 <%@ var evalObject: com.recipegrace.bbc.codegen.ExpressionCreator%>
 <%@ val sparkProperties:String= evalObject.evaluateVariable(sparkJob.sparkJob.props,localVariables).toString%>
+<%@ val sparkPropertiesCalculated:List[(String,String)] = if(sparkProperties.isEmpty || !sparkProperties.contains("==")) List() else sparkProperties.split(",").flatMap(f=> f.split("==")).grouped(2).map(f=> f.head ->f(1)).toList%>
 <%@ val hasArguments:Boolean = sparkJob.sparkJob.args.nonEmpty%>
 <%@ var name: String%>
 <%@ val jarLocationCalculated: String  = sparkJob.sparkJob.repository match {
@@ -20,6 +21,6 @@ case _ => evalObject.evaluateVariable(sparkJob.sparkJob.jarLocation.get, localVa
     main_class='${sparkJob.sparkJob.mainClass}',
     job_name='submit_spark_${sparkJob.name}',
     #if(hasArguments)arguments=[${ sparkJob.sparkJob.args.get.map(f=> "'"+evalObject.evaluateVariable(f,localVariables )+"'").mkString(",")}],
-    #end#if(sparkProperties.nonEmpty)dataproc_spark_properties='${sparkProperties}',
+    #end#if(sparkProperties.nonEmpty)dataproc_spark_properties={${sparkPropertiesCalculated.map(f=> "'"+ f._1 +"':'"+f._2 +"'").mkString(", ")}},
     #endcluster_name='${clusterName}'.lower()
   )

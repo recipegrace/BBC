@@ -26,7 +26,7 @@ class WorkflowsFromFilesTest extends BaseWorkflowTest {
 
     main.errorMessage shouldBe ""
     main.generateFlows.clusterStore.running shouldBe List()
-    //println(content.get)
+    println(content.get)
     //val writer = new FileWriter(".tests/output.txt")
     //writer.append(content.get)
     //writer.close()

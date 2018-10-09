@@ -81,7 +81,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
     val localVariables = Map(): Map[String, Expression]
     object evalObject extends ExpressionCreator
     val mainPyFile = "samplel.py"
-    val sparkProps = "-x.ua  y.ub"
+    val sparkProps = "ua==BX,ub==AX"
     val programArguments = Array("arg1", "arg2")
     val otherPyFiles = Array("sample1.py","sample2.py")
     val jobName = "Zjob"
@@ -110,7 +110,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
          |    job_name='submit_spark_${job._2.name}',
          |    pyfiles=[${otherPyFiles.map(f => "'" + f + "'").mkString(",")}],
          |    arguments=[${programArguments.map(f => "'" + f + "'").mkString(",")}],
-         |    dataproc_spark_properties='${sparkProps}',
+         |    dataproc_spark_properties={'ua':'BX', 'ub':'AX'},
          |    cluster_name='${clusterName}'.lower()
   )""".stripMargin
   }
@@ -120,7 +120,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
     val localVariables = Map():Map[String, Expression]
     object evalObject extends ExpressionCreator
     val className = "com.x.y.Z"
-    val sparkProps = "-x.ua  y.ub"
+    val sparkProps = "a==b,b==c"
     val programArguments = Array("arg1", "arg2")
     val jarURI = "jar link"
     val jobName = "Zjob"
@@ -147,7 +147,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
                                                  |    main_class='${job._2.sparkJob.mainClass}',
                                                  |    job_name='submit_spark_${job._2.name}',
                                                  |    arguments=[${programArguments.map(f=>"'"+f+"'").mkString(",")}],
-                                                 |    dataproc_spark_properties='${sparkProps}',
+                                                 |    dataproc_spark_properties={'a':'b', 'b':'c'},
                                                  |    cluster_name='${clusterName}'.lower()
   )""".stripMargin
 
