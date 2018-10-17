@@ -233,7 +233,6 @@ trait BBCGrammar  extends BaseGrammar{
 
 
 
-
   /* Action statements */
 
   def _action: Parser[ActionTypeWithId] = _deleteAction | _runJobAction

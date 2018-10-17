@@ -207,16 +207,16 @@ object BBCStructures {
     }
   }
 
-  class RepositoryJobWrapper(repository: Expression,container:Expression, branch:Expression,name:String) {
+  class RepositoryJobWrapper(repository: Option[Expression],container:Option[Expression], branch:Option[Expression],name:String) {
     def getRepository = repository
     def getBranch = branch
     def getName = name
     def getContainer =container
   }
-  case class PyJobWrapper (mainPyFile:Expression,  repository:Expression, container:Expression,
-                            branch:Expression, name:String,args:Option[Array[Expression]]) extends RepositoryJobWrapper(repository,container,branch,name)
-  case class SBTJobWrapper(mainClass:Expression,  repository:Expression, branch:Expression,
-                            container:Expression,name:String,args:Option[Array[Expression]]) extends RepositoryJobWrapper(repository,container,branch,name)
+  case class PyJobWrapper (mainPyFile:Expression,  repository:Option[Expression], container:Option[Expression],
+                            branch:Option[Expression], name:String,args:Option[Array[Expression]]) extends RepositoryJobWrapper(repository,container,branch,name)
+  case class SBTJobWrapper(mainClass:Expression,  repository:Option[Expression], branch:Option[Expression],
+                            container:Option[Expression],name:String,args:Option[Array[Expression]]) extends RepositoryJobWrapper(repository,container,branch,name)
 
 
   case class JavaJobWrapper(mainClass:Expression,jarLocation:Expression,args:Option[Array[Expression]], properties:Option[Expression] )
@@ -275,7 +275,7 @@ object BBCStructures {
       }.toMap
     def calculateWrapper() = {
 
-      new RepositoryJobWrapper(configMap(REPOSITORY), configMap(CONTAINER), configMap(REPOBRANCH),name)
+      new RepositoryJobWrapper(configMap.get(REPOSITORY), configMap.get(CONTAINER), configMap.get(REPOBRANCH),name)
     }
   }
 
@@ -291,7 +291,7 @@ object BBCStructures {
         case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
 
       }.toMap ++configMap
-      PyJobWrapper(pyConfigs(MAINPYFILE), pyConfigs(REPOSITORY), pyConfigs(CONTAINER), pyConfigs(REPOBRANCH),name,arrayMap.get(ARGS))
+      PyJobWrapper(pyConfigs(MAINPYFILE), pyConfigs.get(REPOSITORY), pyConfigs.get(CONTAINER), pyConfigs.get(REPOBRANCH),name,arrayMap.get(ARGS))
     }
   }
 
@@ -307,7 +307,7 @@ object BBCStructures {
           case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
 
         }.toMap ++ configMap
-      SBTJobWrapper(sbtConfigs(MAINCLASS), sbtConfigs(REPOSITORY), sbtConfigs(REPOBRANCH),sbtConfigs(CONTAINER),name,arrayMap.get(ARGS))
+      SBTJobWrapper(sbtConfigs(MAINCLASS), sbtConfigs.get(REPOSITORY), sbtConfigs.get(REPOBRANCH),sbtConfigs.get(CONTAINER),name,arrayMap.get(ARGS))
     }
   }
 
@@ -354,7 +354,6 @@ object BBCStructures {
 
 
   case class ArtifactoryConfigRepositoryName(name: Expression) extends ArtifactoryConfig
-
 
   case class ArtifactoryConfigURL(url: Expression) extends ArtifactoryConfig
 

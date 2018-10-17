@@ -18,7 +18,7 @@ trait BaseConcoursePythonTask  extends ExpressionCreator with ClusterServiceTask
 
     val mainPyFile:Any =evaluateVariable (pyJob.pyJob.mainPyFile, localVariables)
 
-    val container:Any =evaluateVariable ( pyJob.pyJob.container, localVariables)
+    val container:Any =evaluateVariable ( pyJob.pyJob.container.get, localVariables)
 
 
     val variablesEvaluated:List[Any] = pyJob.pyJobConfigs.flatMap(f=> f match {
@@ -26,8 +26,8 @@ trait BaseConcoursePythonTask  extends ExpressionCreator with ClusterServiceTask
       case _ => List()
     })
 
-    val gitRepo =evaluateVariable ( pyJob.pyJob.repository, localVariables)
-    val gitBranch = evaluateVariable(pyJob.pyJob.branch,localVariables)
+    val gitRepo =evaluateVariable ( pyJob.pyJob.repository.get, localVariables)
+    val gitBranch = evaluateVariable(pyJob.pyJob.branch.get,localVariables)
     val resourceName =  createResourceName(gitRepo.toString,gitBranch.toString)
     val params = Map("PROXYPORT"->"{{proxy-port}}", "PROXYURL"->"{{proxy-url}}","GCPTOKEN" -> "{{gcp-token}}", "GITHDTOKEN" ->"{{github-private-key}}" )
 

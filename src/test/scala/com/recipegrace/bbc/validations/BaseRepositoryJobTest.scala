@@ -113,14 +113,7 @@ abstract class BaseRepositoryJobTest  extends BaseWorkflowTest {
     }
   }
 
-  test("mandatory") {
-    assertionErrorOnDeclaration(
-      s"""$jobName example {
 
-        }
-      """.stripMargin, s"$jobName example have missing field(s):$fieldName,repository,repoBranch,container")
-
-  }
 
   test("resource generation"){
     getFlowblocks(

@@ -15,7 +15,7 @@ trait PyJobValidation extends BaseValidations with GrammarKeywords {
   }
 
   def validatePyJobConfigs(pyJobConfigs: List[RepositoryJobConfig], name: String) = {
-    mandatory(List(MAINPYFILE)++repositoryMandatoryFields, pyJobConfigs, s"pythonjob $name")
+    mandatory(List(MAINPYFILE), pyJobConfigs, s"pythonjob $name")
     validateRepositoryJobConfigs(pyJobConfigs,name)
     configValidation(pyJobConfigs, s"on pythonjob $name")
     pyJobConfigs.foreach {
