@@ -34,7 +34,7 @@ class WorkflowsFromFilesTest extends BaseWorkflowTest {
 
   test("main file test (concourse)") {
 
-    val fileName = "simplejob.bbc"
+    val fileName = "fakeexample.bbc"
     printOutConcourseAndComposePipeLines(fileName)
 
   }

@@ -18,13 +18,15 @@ class RunPythonFlowBlock(pyJob: PyJob, variables:Map[String,Expression], configu
   extends FlowBlock(configuration) with BaseConcoursePythonTask {
 
 
-  override  var displayName:String = "pythonjob-"
+  override  var displayName:String = "pythonjob"
   override var toXML: NodeSeq = {
 
   <notimplemented/>
   }
   override var toYAML: List[Map[String, Any]] = {
+    if(pyJob.pyJob.container.nonEmpty)
     createBasePythonConcourseTask(autoId,displayName,pyJob,variables,clusterStore,configuration)
+    else List()
   }
   override val flowBlockId: Int = autoId
 
@@ -33,10 +35,7 @@ class RunPythonFlowBlock(pyJob: PyJob, variables:Map[String,Expression], configu
     object evalObject extends ExpressionCreator
     val id = IDGenerator.autoId
     val defaultArgs = Map ( "programConfiguration"->configuration, "localVariables" -> variables,"evalObject" -> evalObject)
-    /* val copyJarKey = displayName +"_C"+id
-     val copyJarContent = Templates.translate("templates/download-jar.ssp",Map("name" -> copyJarKey,
-       "javaJob" -> javaJob) ++defaultArgs)
- */
+
     val runJarKey = displayName+"_R"+id
     val runJarContent = Templates.translate("templates/run-python.ssp",Map("name" -> runJarKey,
       "pythonJob" -> pyJob) ++defaultArgs)
