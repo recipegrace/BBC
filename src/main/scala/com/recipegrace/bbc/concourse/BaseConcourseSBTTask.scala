@@ -25,10 +25,10 @@ trait BaseConcourseSBTTask  extends ExpressionCreator with ClusterServiceTask wi
       case _ => List()
     })
     val withMainClass = List(List("runMain",  (mainClass:: variablesEvaluated).mkString(" ")).mkString("\""," ", "\""))
-    val container:Any =evaluateVariable ( sbtJob.sbtJob.container, localVariables)
+    val container:Any =evaluateVariable ( sbtJob.sbtJob.container.get, localVariables)
 
-    val gitRepo =evaluateVariable ( sbtJob.sbtJob.repository, localVariables)
-    val gitBranch = evaluateVariable(sbtJob.sbtJob.branch,localVariables)
+    val gitRepo =evaluateVariable ( sbtJob.sbtJob.repository.get, localVariables)
+    val gitBranch = evaluateVariable(sbtJob.sbtJob.branch.get,localVariables)
     val resourceName =  createResourceName(gitRepo.toString,gitBranch.toString)
     val params = Map("PROXYPORT"->"{{proxy-port}}", "PROXYURL"->"{{proxy-url}}","GCPTOKEN" -> "{{gcp-token}}", "GITHDTOKEN" ->"{{github-private-key}}" )
 

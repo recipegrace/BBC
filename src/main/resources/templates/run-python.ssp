@@ -1,0 +1,14 @@
+<%@ var programConfiguration:com.recipegrace.bbc.workflow.ProgramConfiguration %>
+<%@ var pythonJob:com.recipegrace.bbc.grmr.BBCStructures.PyJob %>
+<%@ var localVariables:Map[String, com.recipegrace.bbc.grmr.Expressions.Expression] %>
+<%@ var evalObject: com.recipegrace.bbc.codegen.ExpressionCreator%>
+<%@ val hasArguments:Boolean = pythonJob.pyJob.args.nonEmpty%>
+<%@ val mainPyFile:String = evalObject.evaluateVariable(pythonJob.pyJob.mainPyFile,localVariables).toString%>
+<%@ var name: String%>
+
+  from ${mainPyFile} import main
+  ${name} = python_operator.PythonOperator(
+   task_id='run_python_${name}',
+   #if(hasArguments)op_args=[${pythonJob.pyJob.args.get.map(f=> "'"+evalObject.evaluateVariable(f,localVariables )+"'").mkString(",")}],
+   #endpython_callable=main
+  )

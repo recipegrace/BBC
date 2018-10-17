@@ -45,6 +45,7 @@ from airflow import models
 from airflow.contrib.operators import dataproc_operator
 from airflow.contrib.operators import gcs_download_operator
 from airflow.operators import bash_operator
+from airflow.operators import python_operator
 from airflow.utils import trigger_rule
 from airflow.contrib.hooks.gcp_dataproc_hook import DataProcHook
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook

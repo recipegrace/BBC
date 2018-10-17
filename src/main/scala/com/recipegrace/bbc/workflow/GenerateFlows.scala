@@ -45,7 +45,9 @@ class GenerateFlows(bBC: BBC) extends ClusterStoreIO with  GrammarKeywords with 
 
 
   def findResources = {
-    bBC.activeRepositoryJobs(bBC.actions).groupBy(f=>f.getName).map(f=>f._2.head).toList.map(f=> GitRepository( f.repositoryJob.getRepository.value+"", f.repositoryJob.getBranch.value+"",f.repositoryJob.getName))
+
+    if(    bBC.activeRepositoryJobs(bBC.actions).groupBy(f=>f.getName).map(f=>f._2.head).toList.exists(f=> f.repositoryJob.getBranch.isEmpty)) List()
+    else bBC.activeRepositoryJobs(bBC.actions).groupBy(f=>f.getName).map(f=>f._2.head).toList.map(f=> GitRepository( f.repositoryJob.getRepository.get.value+"", f.repositoryJob.getBranch.get.value+"",f.repositoryJob.getName))
 
   }
   def createDownloadBlock(programConfiguration: ProgramConfiguration, repository: Repository, org: Expressions.Expression,

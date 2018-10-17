@@ -53,6 +53,7 @@ abstract class BaseTemplateMain extends BBCGrammar {
       }
     } catch {
       case x: Throwable => {
+        x.printStackTrace()
         logger.setLevel(Level.SEVERE)
         logger.info("parse error:" + x.getMessage)
         errorMessage = x.getMessage

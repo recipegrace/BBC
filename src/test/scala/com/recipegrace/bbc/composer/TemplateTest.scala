@@ -13,6 +13,41 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
 
   val taskName = "name"
 
+  test("python job "){
+    val programConfiguration = ProgramConfiguration(expr("one"), expr("zone"), "name", None)
+    val localVariables = Map(): Map[String, Expression]
+    object evalObject extends ExpressionCreator
+    val mainPyFile = "hola"
+    val props = "-x.ua  y.ub"
+    val programArguments = Array("arg1", "arg2")
+    val bucketName = "something"
+    val objectName = "somethingelse"
+    val jarLocation = s"gs://${bucketName}/${objectName}"
+    val jobName = "Zjob"
+
+
+    val jobDefintiion =
+      s"""pythonjob $jobName {
+        mainPyFile="$mainPyFile"
+        args= ${programArguments.map(f => "\"" + f + "\"").mkString(",")}
+        }
+      """.stripMargin
+
+
+    val job = parseAll(_pyJobBody, jobDefintiion).get
+
+
+    Templates.translate("templates/run-python.ssp", Map("name" -> taskName, "localVariables" -> localVariables,
+      "evalObject" -> evalObject,
+      "programConfiguration" -> programConfiguration,
+      "pythonJob" -> job._2)) shouldBe "\n" +
+      s"""  from $mainPyFile import main
+         |  $taskName = python_operator.PythonOperator(
+         |   task_id='run_python_${taskName}',
+         |   op_args=[${programArguments.map(f => "'" + f + "'").mkString(",")}],
+         |   python_callable=main
+  )""".stripMargin
+  }
 
   test("java job "){
     val programConfiguration = ProgramConfiguration(expr("one"), expr("zone"), "name", None)
@@ -239,7 +274,7 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
     output shouldBe "<p> Hello Hiram Chirino, from Tampa. </p>"
   }
   test("template header test") {
-    ComposerFlowBlockCombiner.generateHeaderContent(ProgramConfiguration(expr("env"),expr("zone"),"hola",None)) should have size 18099
+    ComposerFlowBlockCombiner.generateHeaderContent(ProgramConfiguration(expr("env"),expr("zone"),"hola",None)) should have size 18145
 
   }
 }
