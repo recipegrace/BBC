@@ -51,6 +51,7 @@ trait BBCGrammar  extends BaseGrammar{
       ClusterConfigWorkers( NumberExpression( f._2.toInt))
     })) |
       (IMAGE ~ EQUAL ~ _expression) ^^ (f => ClusterConfigImage(f._2)) |
+      (DATAPROCVERSION ~ EQUAL ~ _expression) ^^ (f => ClusterConfigDataProcVersion(f._2)) |
       TAGS ~ EQUAL ~ repsep(_expression, COMMA) ^^ (f => {
         val stripped = f._2.map(f => f).toArray
         ClusterConfigTags(stripped)

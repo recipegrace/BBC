@@ -81,4 +81,35 @@ class BBCClusterTest extends BaseBBCGrammarTest {
       case ClusterConfigProperties(List(StringExpression(x))) => x shouldBe properties
     }
   }
+
+  test("cluster  with dataproc test") {
+    val clusterName = "datacluster"
+    val workers = 0
+    val image = "sdd-hs-12"
+    val properties = "properties"
+    val dataprocVersion = "DATAPROCVERSION"
+
+    val clusterBlock =
+      s"""
+      cluster ${clusterName} {
+      dataprocVersion = "$dataprocVersion"
+      workers=${workers}
+      image="${image}"
+      properties="${properties}"
+      }
+    """
+
+
+
+
+    val cluster = parseAll(_clusterBody, clusterBlock).get
+
+
+    cluster._2.clusterConfigs.foreach {
+      case ClusterConfigWorkers(NumberExpression(x)) => x shouldBe workers
+      case ClusterConfigImage(StringExpression(x)) => x shouldBe image
+      case ClusterConfigProperties(List(StringExpression(x))) => x shouldBe properties
+      case ClusterConfigDataProcVersion(StringExpression(text)) => text shouldBe dataprocVersion
+    }
+  }
 }

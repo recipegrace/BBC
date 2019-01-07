@@ -65,6 +65,7 @@ object BBCStructures {
 
   case class ClusterConfigWorkers(workers: Expression) extends ClusterConfig
   case class ClusterConfigImage(image: Expression) extends ClusterConfig
+  case class ClusterConfigDataProcVersion(version:Expression) extends ClusterConfig
   case class ClusterConfigSubNetwork(subNetwork: Expression) extends ClusterConfig
   case class ClusterConfigTags(tags: Array[Expression]) extends ClusterConfig
   case class ClusterConfigProperties(props: List[Expression]) extends ClusterConfig
@@ -73,7 +74,7 @@ object BBCStructures {
   case class ClusterConfigInitialScriptTimeOut(timeOut: Expression) extends ClusterConfig
 
 
-  case class ClusterWrapper(workers:Expression,image:Expression,initialScript:Option[Expression],initialActionTimeout:Option[Expression], subNetWork:Option[Expression], tags:Option[Array[Expression]])
+  case class ClusterWrapper(workers:Expression,image:Expression,initialScript:Option[Expression],initialActionTimeout:Option[Expression], subNetWork:Option[Expression], tags:Option[Array[Expression]], version:Option[Expression])
   case class Cluster(id: Int, variableName: String, clusterConfigs: List[ClusterConfig]) extends Declaration {
     val name = "BB-"+variableName + rand
     lazy val cluster = calculateWrapper()
@@ -94,12 +95,15 @@ object BBCStructures {
         case x: ClusterConfigInitialScript =>INITIALSCRIPT -> x.script
         case x: ClusterConfigSubNetwork =>SUBNETWORK -> x.subNetwork
         case x: ClusterConfigInitialScriptTimeOut =>INITIALSCRIPTTIMEOUT -> x.timeOut
+        case x: ClusterConfigDataProcVersion => DATAPROCVERSION -> x.version
         case _ => (System.currentTimeMillis()+"") -> StringExpression(System.currentTimeMillis()+"" )
 
       }.toMap
     def calculateWrapper() = {
 
-      new ClusterWrapper(configMap(NUMWORKERS), configMap(IMAGE), configMap.get(INITIALSCRIPT),configMap.get(INITIALSCRIPTTIMEOUT), configMap.get(SUBNETWORK), tagMap.get(TAGS))
+      new ClusterWrapper(configMap(NUMWORKERS), configMap(IMAGE),
+        configMap.get(INITIALSCRIPT),configMap.get(INITIALSCRIPTTIMEOUT),
+        configMap.get(SUBNETWORK), tagMap.get(TAGS), configMap.get(DATAPROCVERSION))
     }
 
   }
