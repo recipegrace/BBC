@@ -39,6 +39,12 @@ class WorkflowsFromFilesTest extends BaseWorkflowTest {
 
   }
 
+  test("simple job dataproc") {
+
+    val fileName = "simplejob.bbc"
+    printOutConcourseAndComposePipeLines(fileName)
+
+  }
   test("main file test (compose)") {
 
     val fileName = "javajob.bbc"
