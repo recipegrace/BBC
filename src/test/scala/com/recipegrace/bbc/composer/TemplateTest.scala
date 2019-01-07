@@ -264,6 +264,32 @@ class TemplateTest extends BaseBBCGrammarTest with ExpressionCreator{
 
   }
 
+  test("template test for  create cluster with dataproc version") {
+    val cluster = Cluster(1,"big-bricks",List(ClusterConfigImage(expr("image")),
+      ClusterConfigDataProcVersion(expr("1.3.19-deb9")),ClusterConfigWorkers(expr("2"))))
+    val programConfiguration = ProgramConfiguration(expr("one"),expr("zone"),"name",None)
+    val localVariables = Map():Map[String, Expression]
+    object evalObject extends ExpressionCreator
+    Templates.translate("templates/create-cluster.ssp",Map("name"-> taskName,
+      "localVariables" -> localVariables,
+      "evalObject" -> evalObject,
+      "programConfiguration" -> programConfiguration,
+      "cluster" -> cluster )) shouldBe "\n"+s"""  ${taskName} = DataprocClusterCreateOperatorModified(
+                                               |    task_id='create_cluster_$taskName',
+                                               |    # Give the cluster a unique name by appending the date scheduled.
+                                               |    # See https://airflow.apache.org/code.html#default-variables
+                                               |    cluster_name='${cluster.name}'.lower(),
+                                               |    num_workers=${ evalObject.evaluateVariable(cluster.cluster.workers,localVariables)},
+                                               |    zone='${evalObject.evaluateVariable(programConfiguration.zone,localVariables )}',
+                                               |    image_version='${evalObject.evaluateVariable(cluster.cluster.version.get, localVariables)}',
+                                               |    master_machine_type='${evalObject.evaluateVariable(cluster.cluster.image,localVariables)}',
+                                               |    worker_machine_type='${evalObject.evaluateVariable(cluster.cluster.image,localVariables)}'
+                                               |  )""".stripMargin
+
+
+  }
+
+
 
 
 

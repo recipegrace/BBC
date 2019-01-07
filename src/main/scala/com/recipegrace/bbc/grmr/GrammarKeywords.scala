@@ -12,6 +12,7 @@ trait GrammarKeywords {
   val IMAGE = "image"
   val TAGS = "tags"
   val INITIALSCRIPT = "initialScript"
+  val DATAPROCVERSION = "dataprocVersion"
   val VERSION = "version"
   val INITIALSCRIPTTIMEOUT = "initialScriptTimeOut"
   val CONTAINER = "container"
