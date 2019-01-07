@@ -37,8 +37,10 @@ trait ClusterServiceTask extends ExpressionCreator{
       case x: ClusterConfigVersion => List("-version" -> x.version)
       case x: ClusterConfigInitialScriptTimeOut => List("-initialScriptTimeOut" -> x.timeOut)
       case x: ClusterConfigSubNetwork => List("-subNetwork" -> x.subNetwork)
+
         //Temp fix!!
       case x: ClusterConfigTags => List("-tags" -> expr( x.tags.mkString(",")))
+      case x: ClusterConfigDataProcVersion => List("-imageVersion" -> x.version)
 
     }
   }

@@ -21,6 +21,7 @@ cloudWorkspace="gs://mosambi"
     cluster simpleCluster {
         workers=10
         image="n1-standard-16"
+        dataprocVersion="1.3.19-deb9"
         properties="spark:spark.executor.cores=16"
         version="somethingortheother"
     }
